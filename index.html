@@ -19,7 +19,8 @@
   --accent:#e8833a; --accent-ink:#1a0f06; --accent-soft:rgba(232,131,58,.14);
   --good:#7bc47f; --bad:#e2706a;
   --r:14px;
-  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px); --ios-blur:min(env(safe-area-inset-top,0px),24px);  /* iOS-Weichzeichner-Streifen unter der Statusleiste: Inhalte darunter tiefer setzen */
+   --safe-b:env(safe-area-inset-bottom,0px);
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --serif:ui-serif,"New York","Iowan Old Style",Georgia,serif;  /* ui-serif = Apples „New York“ auf iPhone/Mac */
 }
@@ -33,7 +34,7 @@ a{color:var(--accent)}
 
 /* Layout */
 header.top{position:sticky;top:0;z-index:5;background:var(--bg);  /* fester Hintergrund: kein Durchscheinen/Verschwimmen unter der Notch */
-  padding:calc(var(--safe-t) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+  padding:calc(var(--safe-t) + var(--ios-blur) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
 header.top h1{margin:0;font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:-.01em}
 header.top .sub{color:var(--muted);font-size:13px}
 main{padding:14px 16px calc(var(--safe-b) + 96px)}
@@ -110,7 +111,7 @@ select.input{background-image:linear-gradient(45deg,transparent 50%,var(--muted)
 /* Sheet */
 .sheet{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;transform:translateY(0);animation:up .22s ease}
 @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
-.sheet .hd{display:flex;align-items:center;gap:8px;padding:calc(var(--safe-t) + 8px) 8px 8px;border-bottom:1px solid var(--line)}
+.sheet .hd{display:flex;align-items:center;gap:8px;padding:calc(var(--safe-t) + var(--ios-blur) + 8px) 8px 8px;border-bottom:1px solid var(--line)}
 .sheet .hd .ttl{flex:1;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sheet .hd button{background:none;border:0;color:var(--accent);padding:8px 10px;font-weight:600;min-width:72px;min-height:44px}
 .sheet .bd{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--safe-b) + 30px)}
@@ -175,7 +176,7 @@ dl.meta dt{color:var(--muted)} dl.meta dd{margin:0;word-break:break-word}
 @keyframes scan{from{top:18%}to{top:82%}}
 .scanner .msg{position:absolute;left:0;right:0;top:calc(45% + 26vw);text-align:center;color:#fff;font-size:15px;padding:0 24px;text-shadow:0 1px 4px #000}
 @media(min-width:540px){.scanner .msg{top:calc(45% + 140px)}}
-.scanner .close{position:absolute;top:calc(var(--safe-t) + 12px);right:14px;z-index:2;border:0;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;padding:10px 16px;font-weight:600}
+.scanner .close{position:absolute;top:calc(var(--safe-t) + var(--ios-blur) + 12px);right:14px;z-index:2;border:0;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;padding:10px 16px;font-weight:600}
 
 /* Toast & modal */
 .toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 92px);transform:translateX(-50%);z-index:80;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s}
@@ -229,7 +230,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
    ========================================================= */
 
 // ---------- Konstanten ----------
-const APP_VERSION = 6;   // bei jedem Update erhöhen – gleiche Zahl wie in sw.js (plattenregal-vN)
+const APP_VERSION = 7;   // bei jedem Update erhöhen – gleiche Zahl wie in sw.js (plattenregal-vN)
 const GRADES = [
   ['M',  'Mint',           'Neu und ungespielt, makellos'],
   ['NM', 'Near Mint',      'Nahezu perfekt, kaum gespielt, keine sichtbaren Spuren'],
