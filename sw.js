@@ -1,5 +1,5 @@
 // Offline-Cache für die App-Dateien. Discogs-Anfragen werden nie gecacht.
-const CACHE = 'plattenregal-v5';
+const CACHE = 'plattenregal-v6';
 const SHELL = ['./', './index.html', './zxing.min.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 

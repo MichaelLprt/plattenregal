@@ -59,5 +59,6 @@ Dann im Mac-Browser: http://localhost:8000
 Bei jeder Änderung:
 1. Lokal ändern, mit lokalem Testserver testen, Michael sagen, wie er testen kann.
 2. **Erst nach Michaels OK** committen und pushen – mit verständlicher deutscher Commit-Beschreibung.
-3. Bei Änderungen an App-Dateien die Cache-Version in `sw.js` erhöhen (`plattenregal-v1` → `v2` …).
+3. Bei Änderungen an App-Dateien die Cache-Version in `sw.js` erhöhen (`plattenregal-v1` → `v2` …) **und** `APP_VERSION` in `index.html` auf dieselbe Zahl setzen. Die Version steht unten in den Einstellungen, so kann Michael prüfen, ob das iPhone die neue Version geladen hat.
+   - Überschriften: `font-synthesis:none` und nur echte Strichstärken (400/700) für `--serif` verwenden. Grund: Die Überschrift „Plattenregal“ sah auf dem iPhone verschwommen aus. Vermutete Ursache ist künstlich verdickte Schrift (Stand v6, Bestätigung durch Michael steht noch aus).
 4. Nach dem Push sagen: neue Version ist meist nach 1–2 Minuten online (Status: `gh run list` bzw. `gh api repos/MichaelLprt/plattenregal/pages/builds/latest`). Auf dem iPhone die App ggf. einmal ganz schließen (hochwischen) und neu öffnen.

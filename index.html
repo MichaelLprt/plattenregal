@@ -24,7 +24,7 @@
   --serif:ui-serif,"New York","Iowan Old Style",Georgia,serif;  /* ui-serif = Apples „New York“ auf iPhone/Mac */
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4}
+html,body{font-synthesis:none;margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4}
 body{min-height:100vh;overscroll-behavior-y:none}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -34,7 +34,7 @@ a{color:var(--accent)}
 /* Layout */
 header.top{position:sticky;top:0;z-index:5;background:var(--bg);  /* fester Hintergrund: kein Durchscheinen/Verschwimmen unter der Notch */
   padding:calc(var(--safe-t) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
-header.top h1{margin:0;font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-.01em}
+header.top h1{margin:0;font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:-.01em}
 header.top .sub{color:var(--muted);font-size:13px}
 main{padding:14px 16px calc(var(--safe-b) + 96px)}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:repeat(4,1fr);
@@ -116,7 +116,7 @@ select.input{background-image:linear-gradient(45deg,transparent 50%,var(--muted)
 .sheet .bd{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--safe-b) + 30px)}
 .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:14px}
 .hero img{width:120px;height:120px;border-radius:10px;object-fit:cover;background:var(--surface2)}
-.hero h2{margin:0;font-family:var(--serif);font-size:22px;line-height:1.15}
+.hero h2{margin:0;font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.15}
 .hero .a{color:var(--muted);margin-top:4px}
 .hero .y{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
 .cover-big{width:100%;aspect-ratio:1;border-radius:12px;object-fit:cover;background:var(--surface2);display:block;margin-bottom:14px}
@@ -229,6 +229,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
    ========================================================= */
 
 // ---------- Konstanten ----------
+const APP_VERSION = 6;   // bei jedem Update erhöhen – gleiche Zahl wie in sw.js (plattenregal-vN)
 const GRADES = [
   ['M',  'Mint',           'Neu und ungespielt, makellos'],
   ['NM', 'Near Mint',      'Nahezu perfekt, kaum gespielt, keine sichtbaren Spuren'],
@@ -1090,7 +1091,7 @@ function renderSettings(v) {
     </div>
 
     <button class="btn danger block" id="wipe">Alle Daten löschen</button>
-    <p class="small faint" style="text-align:center;margin-top:16px">Plattendaten und Preise: Discogs. Diese App ist nicht mit Discogs verbunden.</p>`;
+    <p class="small faint" style="text-align:center;margin-top:16px">Plattendaten und Preise: Discogs. Diese App ist nicht mit Discogs verbunden.<br>Version ${APP_VERSION}</p>`;
 
   $('#saveTok').onclick = async () => {
     settings.token = $('#tok').value.trim(); settings.noSuggest = false; await saveSettings();
