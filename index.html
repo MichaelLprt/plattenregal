@@ -53,7 +53,7 @@ nav.tabs button.scan.on{color:var(--accent)}
 .btn.danger{background:none;border:1px solid rgba(226,112,106,.5);color:var(--bad)}
 .btn.block{width:100%}
 .btn svg{width:22px;height:22px;flex:0 0 auto}
-.btn.small{padding:8px 12px;font-size:14px;border-radius:10px}
+.btn.small{padding:10px 14px;font-size:15px;border-radius:10px;min-height:44px}
 .btn:disabled{opacity:.5}
 .field{display:block;margin:0 0 12px}
 .field>span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
@@ -76,7 +76,7 @@ select.input{background-image:linear-gradient(45deg,transparent 50%,var(--muted)
 
 /* Collection */
 .toolbar{display:flex;gap:8px;margin-bottom:12px}
-.toolbar .input{padding:10px 12px}
+.toolbar .input{padding:10px 12px;min-height:44px}
 .toolbar select.input{flex:0 0 auto;width:auto;padding-right:30px}
 .iconbtn{flex:0 0 auto;width:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
 .iconbtn svg{width:20px;height:20px}
@@ -112,7 +112,7 @@ select.input{background-image:linear-gradient(45deg,transparent 50%,var(--muted)
 @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 .sheet .hd{display:flex;align-items:center;gap:8px;padding:calc(var(--safe-t) + 8px) 8px 8px;border-bottom:1px solid var(--line)}
 .sheet .hd .ttl{flex:1;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sheet .hd button{background:none;border:0;color:var(--accent);padding:8px 10px;font-weight:600;min-width:72px}
+.sheet .hd button{background:none;border:0;color:var(--accent);padding:8px 10px;font-weight:600;min-width:72px;min-height:44px}
 .sheet .bd{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--safe-b) + 30px)}
 .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:14px}
 .hero img{width:120px;height:120px;border-radius:10px;object-fit:cover;background:var(--surface2)}
@@ -131,12 +131,12 @@ dl.meta dt{color:var(--muted)} dl.meta dd{margin:0;word-break:break-word}
 .track{display:grid;grid-template-columns:34px 1fr auto;gap:8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)}
 .track:last-child{border:0}
 .track .p{color:var(--faint)} .track .d{color:var(--faint);font-variant-numeric:tabular-nums}
-.stars{display:flex;gap:4px}
-.stars button{background:none;border:0;padding:2px;color:var(--faint)}
+.stars{display:flex;gap:6px}
+.stars button{background:none;border:0;padding:5px;color:var(--faint);min-width:46px;min-height:46px}
 .stars button.on{color:var(--accent)}
-.stars svg{width:28px;height:28px}
-.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.grades button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 0;font-weight:700;font-size:14px}
+.stars svg{width:36px;height:36px}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.grades button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 0;min-height:48px;font-weight:700;font-size:16px}
 .grades button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .grade-desc{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:18px}
 .ptable{width:100%;border-collapse:collapse;font-size:14px}
@@ -179,11 +179,13 @@ dl.meta dt{color:var(--muted)} dl.meta dd{margin:0;word-break:break-word}
 
 /* Toast & modal */
 .toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 92px);transform:translateX(-50%);z-index:80;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s}
+.toast.undo{display:flex;align-items:center;gap:14px;padding:6px 6px 6px 16px}
+.toast.undo button{border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;padding:10px 14px;min-height:44px}
 @keyframes tin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 .modal{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:24px}
 .modal .box{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;max-width:360px;width:100%}
 .modal .box p{margin:0 0 16px}
-.modal .row .btn{flex:1}
+.modal .row .btn{flex:1;min-height:48px}
 .progress{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:10px}
 .progress>div{height:100%;background:var(--accent);width:0;transition:width .3s}
 .spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;margin:20px auto}
@@ -214,7 +216,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
     Einstellungen</button>
 </nav>
 
-<input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden">
+<input type="file" id="photoInput" accept="image/*" class="hidden">
 <input type="file" id="importInput" accept="application/json,.json" class="hidden">
 
 <script src="zxing.min.js"></script>
@@ -299,7 +301,8 @@ const saveSnapshots = () => Store.set('snapshots', snapshots);
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-const today = () => new Date().toISOString().slice(0, 10);
+// Datum nach deutscher Ortszeit (nicht Weltzeit), Format JJJJ-MM-TT
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const money = (v, cur) => v == null || isNaN(v) ? '–' :
   new Intl.NumberFormat('de-DE', { style:'currency', currency: cur || settings.currency, maximumFractionDigits: v >= 100 ? 0 : 2 }).format(v);
 const num = v => new Intl.NumberFormat('de-DE').format(v);
@@ -312,6 +315,14 @@ function toast(msg, ms = 2600) {
   document.querySelectorAll('.toast').forEach(t => t.remove());
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   document.body.appendChild(t); setTimeout(() => t.remove(), ms);
+}
+function undoToast(msg, onUndo, ms = 7000) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast undo';
+  t.innerHTML = `<span>${esc(msg)}</span><button type="button">Rückgängig</button>`;
+  const timer = setTimeout(() => t.remove(), ms);
+  t.querySelector('button').onclick = () => { clearTimeout(timer); t.remove(); onUndo(); };
+  document.body.appendChild(t);
 }
 function confirmBox(msg, okLabel = 'OK', danger = false) {
   return new Promise(res => {
@@ -481,6 +492,14 @@ function render() {
 }
 function setHeader(title, sub) { $('#hTitle').textContent = title; $('#hSub').textContent = sub || ''; }
 
+// ---------- Sicherungs-Erinnerung ----------
+const daysSince = t => Math.floor((Date.now() - t) / 864e5);
+function backupDue() {
+  if (records.length < 3) return false;                                             // erst ab ein paar Platten
+  if (settings.backupSnooze && daysSince(settings.backupSnooze) < 7) return false;  // „Später“ = 1 Woche Ruhe
+  return !settings.lastBackup || daysSince(settings.lastBackup) >= 30;
+}
+
 // ---------- Sammlung ----------
 function sortedFiltered() {
   const q = (settings.q || '').toLowerCase().trim();
@@ -517,11 +536,17 @@ function renderCollection(v) {
       </select>
       <button class="iconbtn" id="viewT" aria-label="Ansicht wechseln">${settings.view === 'grid' ? ICON.list : ICON.grid}</button>
     </div>
+    ${backupDue() ? `<div class="banner" id="bkBanner"><b>Zeit für eine Sicherung</b><br>${settings.lastBackup ? `Deine letzte Sicherung ist ${daysSince(settings.lastBackup)} Tage her.` : 'Du hast deine Sammlung noch nie gesichert.'} Deine Platten liegen nur auf diesem Gerät.
+      <div class="row" style="margin-top:10px"><button class="btn small primary" id="bkNow">Jetzt sichern</button><button class="btn small ghost" id="bkLater">Später</button></div></div>` : ''}
     <div class="count" id="cnt"></div>
     <div id="recs"></div>`;
   $('#sort').value = settings.sort;
   $('#q').oninput = e => { settings.q = e.target.value; saveSettings(); drawRecs(); };
   $('#sort').onchange = e => { settings.sort = e.target.value; saveSettings(); drawRecs(); };
+  if ($('#bkNow')) {
+    $('#bkNow').onclick = async () => { if (await exportJSON()) renderCollection(v); };
+    $('#bkLater').onclick = () => { settings.backupSnooze = Date.now(); saveSettings(); $('#bkBanner').remove(); };
+  }
   $('#viewT').onclick = () => { settings.view = settings.view === 'grid' ? 'list' : 'grid'; saveSettings(); renderCollection(v); };
   drawRecs();
 }
@@ -552,7 +577,7 @@ function renderScan(v) {
        <div style="margin-top:8px"><button class="btn small primary" id="toSettings">Token einrichten</button></div></div>` : ''}
     <button class="btn primary block" id="scanBtn" style="padding:16px;font-size:17px">${ICON.barcode} Barcode scannen</button>
     <div class="row" style="margin-top:10px">
-      <button class="btn ghost" id="photoBtn">${ICON.camera} Foto vom Barcode</button>
+      <button class="btn ghost" id="photoBtn">${ICON.camera} Foto vom Barcode (Kamera oder Mediathek)</button>
     </div>
     <div class="or">oder eintippen</div>
     <form id="codeForm" class="row" autocomplete="off">
@@ -867,8 +892,14 @@ function drawDetail(bd, r) {
   };
   $('#del', bd).onclick = async () => {
     if (!(await confirmBox(`„${r.title}“ wirklich aus der Sammlung entfernen?`, 'Entfernen', true))) return;
+    const idx = records.findIndex(x => x.id === r.id);
     records = records.filter(x => x.id !== r.id); await saveRecords(); takeSnapshot();
-    popSheet(); render(); toast('Entfernt');
+    popSheet(); render();
+    undoToast('Entfernt', async () => {
+      if (records.some(x => x.id === r.id)) return;
+      records.splice(Math.min(Math.max(idx, 0), records.length), 0, r);
+      await saveRecords(); takeSnapshot(); render(); toast('Wiederhergestellt ✓');
+    });
   };
 }
 
@@ -1047,7 +1078,9 @@ function renderSettings(v) {
 
     <div class="card">
       <h3>Sicherung</h3>
-      <div class="hint" style="margin-bottom:10px">Deine Daten liegen nur auf diesem Gerät. Exportiere regelmäßig eine Sicherung (z. B. in iCloud Drive) – damit kannst du sie auch auf ein neues Handy übertragen.</div>
+      <div class="hint" style="margin-bottom:10px">Deine Daten liegen nur auf diesem Gerät. Exportiere regelmäßig eine Sicherung (z. B. in iCloud Drive) – damit kannst du sie auch auf ein neues Handy übertragen.
+        <br><b>Letzte Sicherung:</b> ${settings.lastBackup ? dateDE(settings.lastBackup) : 'noch nie'}
+        <br><span class="faint">Hinweis: Die Daten gehören zur Adresse michaellprt.github.io/plattenregal – wird die Adresse je geändert, startet die App leer und braucht die Sicherung.</span></div>
       <div class="grid2"><button class="btn" id="exp">Sicherung exportieren</button><button class="btn" id="impF">Sicherung laden</button></div>
       <button class="btn ghost block" id="csv" style="margin-top:10px">Als CSV exportieren (Excel)</button>
     </div>
@@ -1081,7 +1114,7 @@ function renderSettings(v) {
     if (tab === 'settings') renderSettings(v);
   };
   $('#imp').onclick = () => importDiscogs($('#user').value.trim());
-  $('#exp').onclick = exportJSON;
+  $('#exp').onclick = async () => { if (await exportJSON()) renderSettings(v); };
   $('#impF').onclick = () => $('#importInput').click();
   $('#csv').onclick = exportCSV;
   $('#wipe').onclick = async () => {
@@ -1129,15 +1162,18 @@ async function offerFile(name, text, mime) {
   const blob = new Blob([text], { type: mime });
   try {
     const file = new File([blob], name, { type: mime });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; }
-  } catch (e) { if (e.name === 'AbortError') return; }
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return true; }
+  } catch (e) { if (e.name === 'AbortError') return false; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  return true;
 }
-function exportJSON() {
+async function exportJSON() {
   const data = { app: 'plattenregal', version: 1, exported: new Date().toISOString(), records, snapshots,
     settings: { currency: settings.currency, username: settings.username } };
-  offerFile(`plattenregal-${today()}.json`, JSON.stringify(data), 'application/json');
+  const ok = await offerFile(`plattenregal-${today()}.json`, JSON.stringify(data), 'application/json');
+  if (ok) { settings.lastBackup = Date.now(); settings.backupSnooze = 0; await saveSettings(); toast('Sicherung erstellt ✓'); }
+  return ok;
 }
 function exportCSV() {
   const cols = [['Künstler','artist'],['Titel','title'],['Jahr','year'],['Land','country'],['Label','label'],['Katalog-Nr.','catno'],['Format','format'],

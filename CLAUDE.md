@@ -22,6 +22,9 @@ Private Web-App (PWA) zur Verwaltung von Michaels Schallplattensammlung. Wird au
 Wichtige Teile in `index.html`:
 - `Store`: Speicher in IndexedDB (Datenbank `plattenregal`, Object Store `kv`, Schlüssel `records`, `snapshots`, `settings`), Fallback localStorage mit Präfix `pr_`.
 - `dg()`: Discogs-API-Aufrufe mit Token aus den Einstellungen, Drosselung auf ca. 57 Anfragen/Minute.
+  - Der Token bleibt bewusst als `?token=` in der URL: Mit `Authorization`-Header schickt der Browser vor jeder Anfrage eine CORS-Vorab-Anfrage (OPTIONS), und Discogs zählt die gegen das Limit von 25/Minute ohne Anmeldung (getestet am 18.11.2026). Das würde die Aktualisierung aller Preise stark verlangsamen bzw. scheitern lassen.
+- Sicherungs-Erinnerung: `settings.lastBackup` (Zeitpunkt des letzten JSON-Exports), `settings.backupSnooze` („Später“ = 7 Tage Ruhe). Banner ab 3 Platten, wenn die letzte Sicherung 30 Tage oder länger her ist.
+- `today()` rechnet mit deutscher Ortszeit, nicht mit UTC.
 - `updateMarket()`, `estimate()`: Marktpreise (günstigstes Angebot, Preisvorschlag je Zustand), Wertverlauf `valueHistory`.
 - Tabs: Sammlung, Hinzufügen (Scan), Statistik, Einstellungen. Detail-/Formularansichten als „Sheets“.
 - Export/Import als JSON-Sicherung, CSV-Export.
@@ -49,6 +52,7 @@ Dann im Mac-Browser: http://localhost:8000
 
 - Repository: `MichaelLprt/plattenregal` (öffentlich, nötig für kostenloses GitHub Pages)
 - Online-Adresse: https://michaellprt.github.io/plattenregal/
+- **Repository-Name und GitHub-Benutzername nie ändern**: Die Daten auf dem iPhone hängen an genau dieser Adresse. Bei neuer Adresse startet die App leer.
 - Pages veröffentlicht direkt aus Branch `main`, Ordner `/` (Wurzel).
 - Git-Identität im Repo: Name „Michael“, E-Mail = GitHub-noreply-Adresse (private E-Mail bleibt verborgen).
 
