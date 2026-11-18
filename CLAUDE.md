@@ -25,6 +25,7 @@ Wichtige Teile in `index.html`:
   - Der Token bleibt bewusst als `?token=` in der URL: Mit `Authorization`-Header schickt der Browser vor jeder Anfrage eine CORS-Vorab-Anfrage (OPTIONS), und Discogs zählt die gegen das Limit von 25/Minute ohne Anmeldung (getestet am 18.11.2026). Das würde die Aktualisierung aller Preise stark verlangsamen bzw. scheitern lassen.
 - Sicherungs-Erinnerung: `settings.lastBackup` (Zeitpunkt des letzten JSON-Exports), `settings.backupSnooze` („Später“ = 7 Tage Ruhe). Banner ab 3 Platten, wenn die letzte Sicherung 30 Tage oder länger her ist.
 - `today()` rechnet mit deutscher Ortszeit, nicht mit UTC.
+- **Automatische Updates** (`setupUpdates()`, ab Version 8): Beim Öffnen/Zurückkehren ruft die App `reg.update()` auf. Übernimmt ein neuer Service Worker (`controllerchange`), lädt sie sich einmal neu und zeigt „Auf Version N aktualisiert ✓“. Neu geladen wird nur, wenn `updateIsSafe()` gilt: kein Sheet, Scanner oder Dialog offen, keine Discogs-Anfrage (`dgBusy`), kein Speichervorgang (`Store.writing`), keine Preis-Aktualisierung. Sonst wartet das Update (`updateWaiting`) und wird nach `popSheet()`, Speichern oder Discogs-Antwort erneut versucht. Der Service Worker holt Dateien mit `cache: 'no-cache'` bzw. `'reload'`, weil GitHub Pages sonst bis zu 10 Minuten alte Dateien liefert.
 - `updateMarket()`, `estimate()`: Marktpreise (günstigstes Angebot, Preisvorschlag je Zustand), Wertverlauf `valueHistory`.
 - Tabs: Sammlung, Hinzufügen (Scan), Statistik, Einstellungen. Detail-/Formularansichten als „Sheets“.
 - Export/Import als JSON-Sicherung, CSV-Export.
@@ -37,7 +38,7 @@ Wichtige Teile in `index.html`:
    - Wenn die IndexedDB-Version erhöht wird: `onupgradeneeded` darf nur ergänzen, nie Stores löschen.
    - Der Service Worker cacht nur App-Dateien; er darf IndexedDB nie anfassen.
 2. **Kein Token, Passwort oder persönliche Daten ins Repository.** Der Discogs-Token liegt nur im Gerät (IndexedDB). Keine JSON-Sicherungen (`plattenregal-*.json`/`.csv`) einchecken – siehe `.gitignore`. Vor jedem Commit `git diff --staged` prüfen.
-3. **iPhone-Bedienbarkeit:** große Tasten (mind. ca. 44 px), Daumen-freundlich, Safe-Area (Notch/Home-Balken) beachten.
+3. **iPhone-Bedienbarkeit:** große Tasten (mind. ca. 44 px), Daumen-freundlich, Safe-Area (Notch/Home-Balken) beachten. Doppeltippen-Zoom ist abgeschaltet (`touch-action:manipulation`, Michaels Wunsch). Eingabefelder brauchen mind. 16 px Schrift, sonst zoomt iOS beim Antippen hinein.
 
 ## Lokal testen
 

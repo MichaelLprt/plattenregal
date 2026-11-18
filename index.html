@@ -24,7 +24,7 @@
   --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --serif:ui-serif,"New York","Iowan Old Style",Georgia,serif;  /* ui-serif = Apples „New York“ auf iPhone/Mac */
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}  /* manipulation = kein Vergrößern per Doppeltippen */
 html,body{font-synthesis:none;margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4}
 body{min-height:100vh;overscroll-behavior-y:none}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -230,7 +230,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:14px}
    ========================================================= */
 
 // ---------- Konstanten ----------
-const APP_VERSION = 7;   // bei jedem Update erhöhen – gleiche Zahl wie in sw.js (plattenregal-vN)
+const APP_VERSION = 8;   // bei jedem Update erhöhen – gleiche Zahl wie in sw.js (plattenregal-vN)
 const GRADES = [
   ['M',  'Mint',           'Neu und ungespielt, makellos'],
   ['NM', 'Near Mint',      'Nahezu perfekt, kaum gespielt, keine sichtbaren Spuren'],
@@ -255,6 +255,7 @@ const ICON = {
 // ---------- Speicher (IndexedDB mit localStorage-Fallback) ----------
 const Store = {
   db: null,
+  writing: 0,   // Anzahl laufender Speichervorgänge
   async open() {
     if (!('indexedDB' in window)) return;
     this.db = await new Promise((res) => {
@@ -276,6 +277,7 @@ const Store = {
     } catch (e) { return def; }
   },
   async set(k, v) {
+    this.writing++;
     try {
       if (this.db) return await new Promise((res, rej) => {
         const t = this.db.transaction('kv', 'readwrite');
@@ -284,6 +286,7 @@ const Store = {
       });
       localStorage.setItem('pr_' + k, JSON.stringify(v));
     } catch (e) { toast('Speichern fehlgeschlagen: ' + e.message); }
+    finally { this.writing--; if (updateWaiting) setTimeout(applyUpdateIfSafe, 300); }
   }
 };
 
@@ -294,6 +297,7 @@ let settings = { token:'', currency:'EUR', username:'', noSuggest:false, view:'g
 let tab = 'sammlung';
 let lastResults = [];  // letzte Suchergebnisse
 let busyRefresh = false;
+let updateWaiting = false;  // neue Version bereit, wartet auf einen sicheren Moment zum Neuladen
 
 const saveRecords = () => Store.set('records', records);
 const saveSettings = () => Store.set('settings', settings);
@@ -336,8 +340,13 @@ function confirmBox(msg, okLabel = 'OK', danger = false) {
 }
 
 // ---------- Discogs API ----------
-let lastCall = 0;
+let lastCall = 0, dgBusy = 0;
 async function dg(path, params = {}, attempt = 0) {
+  dgBusy++;
+  try { return await dgCall(path, params, attempt); }
+  finally { dgBusy--; if (updateWaiting) setTimeout(applyUpdateIfSafe, 300); }
+}
+async function dgCall(path, params, attempt) {
   if (!settings.token) { const e = new Error('Kein Discogs-Token hinterlegt'); e.status = 0; throw e; }
   const wait = lastCall + 1050 - Date.now();   // max. ~57 Anfragen/Minute (Limit: 60)
   if (wait > 0) await sleep(wait);
@@ -348,7 +357,7 @@ async function dg(path, params = {}, attempt = 0) {
   let res;
   try { res = await fetch(u.toString()); }
   catch (e) { const er = new Error('Keine Verbindung zu Discogs'); er.status = -1; throw er; }
-  if (res.status === 429 && attempt < 3) { await sleep(5000 * (attempt + 1)); return dg(path, params, attempt + 1); }
+  if (res.status === 429 && attempt < 3) { await sleep(5000 * (attempt + 1)); return dgCall(path, params, attempt + 1); }
   if (!res.ok) {
     let msg = 'Discogs-Fehler ' + res.status;
     try { const j = await res.json(); if (j.message) msg = j.message; } catch (_) {}
@@ -724,7 +733,7 @@ function pushSheet(title, build, opts = {}) {
   build(s.querySelector('.bd'), s);
   return s;
 }
-function popSheet() { const s = sheetStack.pop(); if (s) s.remove(); }
+function popSheet() { const s = sheetStack.pop(); if (s) s.remove(); if (updateWaiting) setTimeout(applyUpdateIfSafe, 300); }
 function closeAllSheets() { while (sheetStack.length) popSheet(); }
 
 // ---------- Formular (neu / bearbeiten) ----------
@@ -1212,8 +1221,41 @@ $('#importInput').addEventListener('change', async e => {
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (_) {}
   render();
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (tab === 'stats') render(); }, 250); });
-  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+  setupUpdates();
+  try { const from = sessionStorage.getItem('pr_updatedFrom'); if (from) { sessionStorage.removeItem('pr_updatedFrom'); toast(`Auf Version ${APP_VERSION} aktualisiert ✓`, 4000); } } catch (_) {}
 })();
+
+// ---------- Automatische Updates ----------
+// Bei jedem Öffnen/Zurückkehren fragt die App nach einer neuen Version. Ist eine da, lädt sie sich
+// einmal neu – aber nur, wenn gerade nichts offen ist (Formular, Detailansicht, Scanner, Dialog)
+// und nichts gespeichert oder von Discogs geladen wird. Sonst wartet das Update, bis das erledigt ist.
+// Die gespeicherten Platten (IndexedDB) bleiben dabei unberührt.
+function updateIsSafe() {
+  return !sheetStack.length && !document.querySelector('.scanner, .modal') &&
+    !busyRefresh && !dgBusy && !Store.writing && document.visibilityState === 'visible';
+}
+function applyUpdateIfSafe() {
+  if (!updateWaiting || !updateIsSafe()) return;
+  updateWaiting = false;
+  try { sessionStorage.setItem('pr_updatedFrom', String(APP_VERSION)); } catch (_) {}
+  location.reload();
+}
+function setupUpdates() {
+  if (!('serviceWorker' in navigator) || location.protocol !== 'https:') return;
+  let hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) { hadController = true; return; }   // allererste Installation: kein Neuladen nötig
+    updateWaiting = true; applyUpdateIfSafe();
+  });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    const check = () => reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      check(); applyUpdateIfSafe();
+    });
+    addEventListener('pageshow', check);
+  }).catch(() => {});
+}
 </script>
 </body>
 </html>
