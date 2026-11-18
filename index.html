@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plattenregal</title>
+<meta name="theme-color" content="#121110">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plattenregal">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#121110; --surface:#1c1a18; --surface2:#26231f; --line:#34302b;
+  --text:#f2ede4; --muted:#a39d93; --faint:#6f6a62;
+  --accent:#e8833a; --accent-ink:#1a0f06; --accent-soft:rgba(232,131,58,.14);
+  --good:#7bc47f; --bad:#e2706a;
+  --r:14px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:"New York","Iowan Old Style",Georgia,serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.4}
+body{min-height:100vh;overscroll-behavior-y:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+.hidden{display:none!important}
+
+/* Layout */
+header.top{position:sticky;top:0;z-index:5;background:rgba(18,17,16,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding:calc(var(--safe-t) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+header.top h1{margin:0;font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-.01em}
+header.top .sub{color:var(--muted);font-size:13px}
+main{padding:14px 16px calc(var(--safe-b) + 96px)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:repeat(4,1fr);
+  background:rgba(28,26,24,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);padding:6px 6px calc(var(--safe-b) + 6px)}
+nav.tabs button{background:none;border:0;color:var(--faint);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;padding:6px 0}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button.on{color:var(--text)}
+nav.tabs button.scan .dot{width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;margin-top:-18px;box-shadow:0 4px 18px rgba(232,131,58,.35)}
+nav.tabs button.scan.on{color:var(--accent)}
+
+/* Controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:12px 16px;background:var(--surface2);color:var(--text);font-weight:600}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:none;border:1px solid var(--line)}
+.btn.danger{background:none;border:1px solid rgba(226,112,106,.5);color:var(--bad)}
+.btn.block{width:100%}
+.btn svg{width:22px;height:22px;flex:0 0 auto}
+.btn.small{padding:8px 12px;font-size:14px;border-radius:10px}
+.btn:disabled{opacity:.5}
+.field{display:block;margin:0 0 12px}
+.field>span{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+.input,select.input,textarea.input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;outline:none;-webkit-appearance:none;appearance:none}
+.input:focus{border-color:var(--accent)}
+textarea.input{min-height:80px;resize:vertical}
+select.input{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 52%,calc(100% - 13px) 52%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-size:15px;font-weight:600}
+.card .hint{color:var(--muted);font-size:13px}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.small{font-size:13px}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--surface2);color:var(--text);border:1px solid var(--line);white-space:nowrap}
+.pill.acc{background:var(--accent-soft);border-color:rgba(232,131,58,.4);color:var(--accent)}
+.banner{background:var(--accent-soft);border:1px solid rgba(232,131,58,.35);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;font-size:14px}
+
+/* Collection */
+.toolbar{display:flex;gap:8px;margin-bottom:12px}
+.toolbar .input{padding:10px 12px}
+.toolbar select.input{flex:0 0 auto;width:auto;padding-right:30px}
+.iconbtn{flex:0 0 auto;width:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.iconbtn svg{width:20px;height:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.rec{background:none;border:0;padding:0;text-align:left;display:block;width:100%;align-self:start}
+.rec .cov{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--surface2)}
+.rec .cov img{width:100%;height:100%;object-fit:cover;display:block}
+.rec .cov .pill{position:absolute;left:6px;bottom:6px;background:rgba(18,17,16,.82);backdrop-filter:blur(6px)}
+.rec .t{font-weight:600;font-size:14px;margin-top:7px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rec .a{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec .m{color:var(--faint);font-size:12px;display:flex;justify-content:space-between;gap:6px}
+.rec .m b{color:var(--text);font-weight:600}
+.list .rec{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.list .rec .cov{border-radius:6px}
+.list .rec .cov .pill{display:none}
+.list .rec .t{margin:0;-webkit-line-clamp:1}
+.list .rec .right{text-align:right;font-size:13px}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty svg{width:96px;height:96px;opacity:.9;margin-bottom:10px}
+.count{color:var(--muted);font-size:13px;margin:-4px 0 10px}
+
+/* Search results */
+.res{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:8px;text-align:left;width:100%}
+.res img{width:64px;height:64px;border-radius:6px;object-fit:cover;background:var(--surface2)}
+.res .t{font-weight:600;font-size:14px;line-height:1.25}
+.res .d{font-size:12.5px;color:var(--muted);margin-top:3px}
+.res .tags{margin-top:5px;display:flex;gap:5px;flex-wrap:wrap}
+.or{display:flex;align-items:center;gap:10px;color:var(--faint);font-size:12px;margin:16px 0}
+.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* Sheet */
+.sheet{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;transform:translateY(0);animation:up .22s ease}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.sheet .hd{display:flex;align-items:center;gap:8px;padding:calc(var(--safe-t) + 8px) 8px 8px;border-bottom:1px solid var(--line)}
+.sheet .hd .ttl{flex:1;font-weight:600;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet .hd button{background:none;border:0;color:var(--accent);padding:8px 10px;font-weight:600;min-width:72px}
+.sheet .bd{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(var(--safe-b) + 30px)}
+.hero{display:grid;grid-template-columns:120px 1fr;gap:14px;margin-bottom:14px}
+.hero img{width:120px;height:120px;border-radius:10px;object-fit:cover;background:var(--surface2)}
+.hero h2{margin:0;font-family:var(--serif);font-size:22px;line-height:1.15}
+.hero .a{color:var(--muted);margin-top:4px}
+.hero .y{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.cover-big{width:100%;aspect-ratio:1;border-radius:12px;object-fit:cover;background:var(--surface2);display:block;margin-bottom:14px}
+dl.meta{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:14px}
+dl.meta dt{color:var(--muted)} dl.meta dd{margin:0;word-break:break-word}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi .l{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-size:24px;font-weight:700;letter-spacing:-.01em;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--faint);margin-top:2px}
+.up{color:var(--good)} .down{color:var(--bad)}
+.track{display:grid;grid-template-columns:34px 1fr auto;gap:8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--line)}
+.track:last-child{border:0}
+.track .p{color:var(--faint)} .track .d{color:var(--faint);font-variant-numeric:tabular-nums}
+.stars{display:flex;gap:4px}
+.stars button{background:none;border:0;padding:2px;color:var(--faint)}
+.stars button.on{color:var(--accent)}
+.stars svg{width:28px;height:28px}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.grades button{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 0;font-weight:700;font-size:14px}
+.grades button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.grade-desc{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:18px}
+.ptable{width:100%;border-collapse:collapse;font-size:14px}
+.ptable td{padding:6px 0;border-bottom:1px solid var(--line)}
+.ptable td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.ptable tr.me td{color:var(--accent);font-weight:700}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* Charts */
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart .tip{position:absolute;pointer-events:none;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px;white-space:nowrap;transform:translate(-50%,-100%);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.chart .tip b{display:block;font-size:14px}
+.hbar{display:grid;grid-template-columns:minmax(70px,34%) 1fr auto;gap:10px;align-items:center;font-size:13.5px;margin:7px 0}
+.hbar .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar .track2{height:10px;border-radius:0 4px 4px 0;background:transparent;position:relative}
+.hbar .fill{height:100%;background:var(--accent);border-radius:0 4px 4px 0;min-width:3px}
+.hbar .val{color:var(--muted);font-variant-numeric:tabular-nums;min-width:28px;text-align:right}
+.vbars{display:flex;align-items:flex-end;gap:6px;height:150px;padding-top:18px}
+.vbars .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.vbars .bar{width:100%;max-width:38px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.vbars .n{font-size:12px;color:var(--muted);margin-bottom:3px;font-variant-numeric:tabular-nums}
+.vbars .x{font-size:11.5px;color:var(--faint);margin-top:5px;white-space:nowrap}
+.top5{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left}
+.top5:last-child{border-bottom:0}
+.top5 img{width:40px;height:40px;border-radius:5px;object-fit:cover;background:var(--surface2)}
+.top5 .t{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top5 .a{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top5 .v{font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Scanner */
+.scanner{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column}
+.scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scanner .frame{position:absolute;left:50%;top:45%;width:78%;max-width:420px;aspect-ratio:2/1;transform:translate(-50%,-50%);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.85)}
+.scanner .frame:after{content:"";position:absolute;left:8%;right:8%;top:50%;height:2px;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:scan 1.6s ease-in-out infinite alternate}
+@keyframes scan{from{top:18%}to{top:82%}}
+.scanner .msg{position:absolute;left:0;right:0;top:calc(45% + 26vw);text-align:center;color:#fff;font-size:15px;padding:0 24px;text-shadow:0 1px 4px #000}
+@media(min-width:540px){.scanner .msg{top:calc(45% + 140px)}}
+.scanner .close{position:absolute;top:calc(var(--safe-t) + 12px);right:14px;z-index:2;border:0;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;padding:10px 16px;font-weight:600}
+
+/* Toast & modal */
+.toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 92px);transform:translateX(-50%);z-index:80;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;max-width:90vw;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .2s}
+@keyframes tin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.modal{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:24px}
+.modal .box{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;max-width:360px;width:100%}
+.modal .box p{margin:0 0 16px}
+.modal .row .btn{flex:1}
+.progress{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:10px}
+.progress>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;margin:20px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+details summary{cursor:pointer;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1 id="hTitle">Plattenregal</h1>
+  <div class="sub" id="hSub"></div>
+</header>
+<main id="view"></main>
+
+<nav class="tabs">
+  <button data-tab="sammlung" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="4" height="16" rx="1"/><rect x="9" y="4" width="4" height="16" rx="1"/><path d="M15.5 5.2l3.8-1 3 15.4-3.8 1z"/></svg>
+    Sammlung</button>
+  <button data-tab="scan" class="scan">
+    <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
+    Hinzufügen</button>
+  <button data-tab="stats">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 16l5-5 4 3 7-8"/></svg>
+    Statistik</button>
+  <button data-tab="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    Einstellungen</button>
+</nav>
+
+<input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden">
+<input type="file" id="importInput" accept="application/json,.json" class="hidden">
+
+<script src="zxing.min.js"></script>
+<script>
+'use strict';
+/* =========================================================
+   Plattenregal – private Schallplattensammlung
+   Daten bleiben lokal auf dem Gerät (IndexedDB).
+   Plattendaten & Marktpreise: Discogs API (persönlicher Token).
+   ========================================================= */
+
+// ---------- Konstanten ----------
+const GRADES = [
+  ['M',  'Mint',           'Neu und ungespielt, makellos'],
+  ['NM', 'Near Mint',      'Nahezu perfekt, kaum gespielt, keine sichtbaren Spuren'],
+  ['VG+','Very Good Plus', 'Leichte Gebrauchsspuren, spielt einwandfrei'],
+  ['VG', 'Very Good',      'Sichtbare Spuren, leichtes Knistern hörbar'],
+  ['G+', 'Good Plus',      'Deutlich gespielt, Nebengeräusche, spielt durch'],
+  ['G',  'Good',           'Stark abgenutzt, deutliche Nebengeräusche'],
+  ['F',  'Fair',           'Starke Mängel, springt eventuell'],
+  ['P',  'Poor',           'Kaum noch abspielbar'],
+];
+const SLEEVE_EXTRA = [['Generic','Generic','Neutrale Standardhülle'],['–','Kein Cover','Keine Hülle vorhanden']];
+const DG_GRADE = {M:'Mint (M)',NM:'Near Mint (NM or M-)','VG+':'Very Good Plus (VG+)',VG:'Very Good (VG)','G+':'Good Plus (G+)',G:'Good (G)',F:'Fair (F)',P:'Poor (P)'};
+const VINYL_SVG = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#26231f"/><circle cx="50" cy="50" r="40" fill="#0b0b0b"/><circle cx="50" cy="50" r="34" fill="none" stroke="#2a2724" stroke-width="1"/><circle cx="50" cy="50" r="28" fill="none" stroke="#2a2724" stroke-width="1"/><circle cx="50" cy="50" r="22" fill="none" stroke="#2a2724" stroke-width="1"/><circle cx="50" cy="50" r="13" fill="#e8833a"/><circle cx="50" cy="50" r="2" fill="#26231f"/></svg>')}`;
+const ICON = {
+  grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  barcode:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5v14M7.5 5v14M11 5v14M13.5 5v14M17 5v14M20 5v14"/></svg>',
+  camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+};
+
+// ---------- Speicher (IndexedDB mit localStorage-Fallback) ----------
+const Store = {
+  db: null,
+  async open() {
+    if (!('indexedDB' in window)) return;
+    this.db = await new Promise((res) => {
+      const r = indexedDB.open('plattenregal', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => res(null);
+    });
+  },
+  async get(k, def) {
+    try {
+      if (this.db) return await new Promise((res, rej) => {
+        const q = this.db.transaction('kv').objectStore('kv').get(k);
+        q.onsuccess = () => res(q.result === undefined ? def : q.result);
+        q.onerror = () => rej(q.error);
+      });
+      const v = localStorage.getItem('pr_' + k);
+      return v == null ? def : JSON.parse(v);
+    } catch (e) { return def; }
+  },
+  async set(k, v) {
+    try {
+      if (this.db) return await new Promise((res, rej) => {
+        const t = this.db.transaction('kv', 'readwrite');
+        t.objectStore('kv').put(v, k);
+        t.oncomplete = res; t.onerror = () => rej(t.error);
+      });
+      localStorage.setItem('pr_' + k, JSON.stringify(v));
+    } catch (e) { toast('Speichern fehlgeschlagen: ' + e.message); }
+  }
+};
+
+// ---------- Zustand ----------
+let records = [];      // die Sammlung
+let snapshots = [];    // [{d:'YYYY-MM-DD', count, value}]
+let settings = { token:'', currency:'EUR', username:'', noSuggest:false, view:'grid', sort:'added', q:'' };
+let tab = 'sammlung';
+let lastResults = [];  // letzte Suchergebnisse
+let busyRefresh = false;
+
+const saveRecords = () => Store.set('records', records);
+const saveSettings = () => Store.set('settings', settings);
+const saveSnapshots = () => Store.set('snapshots', snapshots);
+
+// ---------- Helfer ----------
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const today = () => new Date().toISOString().slice(0, 10);
+const money = (v, cur) => v == null || isNaN(v) ? '–' :
+  new Intl.NumberFormat('de-DE', { style:'currency', currency: cur || settings.currency, maximumFractionDigits: v >= 100 ? 0 : 2 }).format(v);
+const num = v => new Intl.NumberFormat('de-DE').format(v);
+const dateDE = d => d ? new Date(d).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' }) : '–';
+const cleanArtist = s => String(s || '').replace(/\s\(\d+\)/g, '').replace(/\*$/,'').trim();
+const parseNum = s => { if (s === '' || s == null) return null; const n = parseFloat(String(s).replace(',', '.')); return isNaN(n) ? null : n; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function toast(msg, ms = 2600) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), ms);
+}
+function confirmBox(msg, okLabel = 'OK', danger = false) {
+  return new Promise(res => {
+    const m = document.createElement('div'); m.className = 'modal';
+    m.innerHTML = `<div class="box"><p>${esc(msg)}</p><div class="row"><button class="btn ghost" data-a="0">Abbrechen</button><button class="btn ${danger?'danger':'primary'}" data-a="1">${esc(okLabel)}</button></div></div>`;
+    m.addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (b || e.target === m) { m.remove(); res(b ? b.dataset.a === '1' : false); } });
+    document.body.appendChild(m);
+  });
+}
+
+// ---------- Discogs API ----------
+let lastCall = 0;
+async function dg(path, params = {}, attempt = 0) {
+  if (!settings.token) { const e = new Error('Kein Discogs-Token hinterlegt'); e.status = 0; throw e; }
+  const wait = lastCall + 1050 - Date.now();   // max. ~57 Anfragen/Minute (Limit: 60)
+  if (wait > 0) await sleep(wait);
+  lastCall = Date.now();
+  const u = new URL('https://api.discogs.com' + path);
+  Object.entries(params).forEach(([k, v]) => v != null && v !== '' && u.searchParams.set(k, v));
+  u.searchParams.set('token', settings.token);
+  let res;
+  try { res = await fetch(u.toString()); }
+  catch (e) { const er = new Error('Keine Verbindung zu Discogs'); er.status = -1; throw er; }
+  if (res.status === 429 && attempt < 3) { await sleep(5000 * (attempt + 1)); return dg(path, params, attempt + 1); }
+  if (!res.ok) {
+    let msg = 'Discogs-Fehler ' + res.status;
+    try { const j = await res.json(); if (j.message) msg = j.message; } catch (_) {}
+    if (res.status === 401) msg = 'Discogs-Token ungültig – bitte in den Einstellungen prüfen';
+    const er = new Error(msg); er.status = res.status; throw er;
+  }
+  return res.json();
+}
+
+function fmtFormats(f) {
+  return (f || []).map(x => {
+    const parts = [x.name, ...(x.descriptions || [])].filter(Boolean);
+    return (x.qty && x.qty !== '1' ? x.qty + '× ' : '') + parts.join(', ');
+  }).join(' + ');
+}
+function fromRelease(r) {
+  const img = (r.images || []).find(i => i.type === 'primary') || (r.images || [])[0];
+  const lab = (r.labels || [])[0] || {};
+  return {
+    discogsId: r.id,
+    artist: cleanArtist(r.artists_sort || (r.artists || []).map(a => a.anv || a.name).join(', ')),
+    title: r.title || '',
+    year: r.year || null,
+    country: r.country || '',
+    label: cleanArtist(lab.name || ''),
+    catno: lab.catno || '',
+    format: fmtFormats(r.formats),
+    genres: r.genres || [],
+    styles: r.styles || [],
+    cover: img ? img.uri : (r.thumb || ''),
+    thumb: img ? (img.uri150 || img.uri) : (r.thumb || ''),
+    tracklist: (r.tracklist || []).filter(t => !t.type_ || t.type_ === 'track').map(t => ({ p: t.position, t: t.title, d: t.duration })),
+    uri: r.uri || `https://www.discogs.com/release/${r.id}`,
+    community: { have: r.community?.have ?? null, want: r.community?.want ?? null, rating: r.community?.rating?.average ?? null },
+    barcodes: (r.identifiers || []).filter(i => i.type === 'Barcode').map(i => i.value),
+  };
+}
+
+async function searchBarcode(code) {
+  code = String(code).replace(/\D/g, '');
+  const variants = [code];
+  if (code.length === 13 && code.startsWith('0')) variants.push(code.slice(1));   // EAN-13 → UPC-A
+  if (code.length === 12) variants.push('0' + code);
+  for (const v of variants) {
+    const j = await dg('/database/search', { barcode: v, type: 'release', per_page: 50 });
+    if (j.results && j.results.length) return j.results;
+  }
+  return [];
+}
+async function searchText(q) {
+  const j = await dg('/database/search', { q, type: 'release', format: 'Vinyl', per_page: 40 });
+  return j.results || [];
+}
+
+function estimate(r) {
+  const m = r.market; if (!m) return null;
+  if (m.suggest && r.mediaCond && m.suggest[r.mediaCond] && m.suggest[r.mediaCond].currency === settings.currency)
+    return m.suggest[r.mediaCond].value;
+  return m.lowest ?? null;
+}
+function estimateSource(r) {
+  const m = r.market; if (!m) return '';
+  if (m.suggest && r.mediaCond && m.suggest[r.mediaCond] && m.suggest[r.mediaCond].currency === settings.currency)
+    return `Discogs-Preisvorschlag für ${r.mediaCond}`;
+  if (m.lowest != null) return 'Günstigstes aktuelles Angebot';
+  return '';
+}
+
+async function updateMarket(rec, { details = false } = {}) {
+  if (!rec.discogsId) return;
+  if (details) {
+    const r = await dg(`/releases/${rec.discogsId}`, { curr_abbr: settings.currency });
+    const d = fromRelease(r);
+    for (const k of ['country','year','label','catno','format','genres','styles','tracklist','community','uri'])
+      if (d[k] != null && (rec[k] == null || rec[k] === '' || (Array.isArray(rec[k]) && !rec[k].length) || k === 'community')) rec[k] = d[k];
+    if (!rec.cover) { rec.cover = d.cover; rec.thumb = d.thumb; }
+  }
+  const st = await dg(`/marketplace/stats/${rec.discogsId}`, { curr_abbr: settings.currency });
+  rec.market = rec.market || {};
+  rec.market.lowest = st.lowest_price ? st.lowest_price.value : null;
+  rec.market.numForSale = st.num_for_sale ?? 0;
+  rec.market.currency = settings.currency;
+  if (!settings.noSuggest) {
+    try {
+      const ps = await dg(`/marketplace/price_suggestions/${rec.discogsId}`);
+      const s = {};
+      for (const [g, k] of Object.entries(DG_GRADE)) if (ps[k]) s[g] = { value: Math.round(ps[k].value * 100) / 100, currency: ps[k].currency };
+      if (Object.keys(s).length) rec.market.suggest = s;
+    } catch (e) {
+      if (e.status === 401 || e.status === 403 || e.status === 404) { settings.noSuggest = true; saveSettings(); }
+    }
+  }
+  rec.market.updated = Date.now();
+  const v = estimate(rec);
+  if (v != null) {
+    rec.valueHistory = rec.valueHistory || [];
+    const last = rec.valueHistory[rec.valueHistory.length - 1];
+    if (last && last.d === today()) last.v = v; else rec.valueHistory.push({ d: today(), v });
+  }
+}
+
+function takeSnapshot() {
+  const value = records.reduce((s, r) => s + (estimate(r) || 0), 0);
+  const snap = { d: today(), count: records.length, value: Math.round(value * 100) / 100 };
+  const last = snapshots[snapshots.length - 1];
+  if (last && last.d === snap.d) snapshots[snapshots.length - 1] = snap; else snapshots.push(snap);
+  saveSnapshots();
+}
+
+async function refreshAll(onProgress) {
+  if (busyRefresh) return;
+  const list = records.filter(r => r.discogsId);
+  if (!list.length) { toast('Keine Platten mit Discogs-Verknüpfung'); return; }
+  busyRefresh = true;
+  let ok = 0, fail = 0;
+  for (let i = 0; i < list.length; i++) {
+    const r = list[i];
+    try { await updateMarket(r, { details: !r.country || !r.community }); ok++; }
+    catch (e) { fail++; if (e.status === 401 || e.status === -1) { toast(e.message); break; } }
+    onProgress && onProgress(i + 1, list.length);
+    if (i % 5 === 4) await saveRecords();
+  }
+  await saveRecords(); takeSnapshot();
+  busyRefresh = false;
+  toast(`Marktpreise aktualisiert: ${ok}${fail ? `, ${fail} Fehler` : ''}`);
+}
+
+// ---------- Navigation ----------
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  render();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+function render() {
+  const v = $('#view');
+  if (tab === 'sammlung') renderCollection(v);
+  else if (tab === 'scan') renderScan(v);
+  else if (tab === 'stats') renderStats(v);
+  else renderSettings(v);
+}
+function setHeader(title, sub) { $('#hTitle').textContent = title; $('#hSub').textContent = sub || ''; }
+
+// ---------- Sammlung ----------
+function sortedFiltered() {
+  const q = (settings.q || '').toLowerCase().trim();
+  let list = records.filter(r => !q || [r.artist, r.title, r.label, r.catno, r.country, String(r.year || ''), (r.genres||[]).join(' '), (r.styles||[]).join(' '), r.notes]
+    .join(' ').toLowerCase().includes(q));
+  const by = {
+    added: (a, b) => (b.addedAt || 0) - (a.addedAt || 0),
+    artist: (a, b) => (a.artist || '').localeCompare(b.artist || '', 'de') || (a.year || 0) - (b.year || 0),
+    year: (a, b) => (a.year || 9999) - (b.year || 9999),
+    value: (a, b) => (estimate(b) ?? -1) - (estimate(a) ?? -1),
+    cond: (a, b) => gradeIdx(a.mediaCond) - gradeIdx(b.mediaCond),
+  }[settings.sort] || (() => 0);
+  return list.sort(by);
+}
+const gradeIdx = g => { const i = GRADES.findIndex(x => x[0] === g); return i < 0 ? 99 : i; };
+
+function renderCollection(v) {
+  const total = records.reduce((s, r) => s + (estimate(r) || 0), 0);
+  setHeader('Plattenregal', records.length ? `${num(records.length)} Platten · Schätzwert ${money(total)}` : 'Deine Schallplattensammlung');
+  if (!records.length) {
+    v.innerHTML = `<div class="empty"><img src="${VINYL_SVG}" width="96" height="96" alt="" style="border-radius:16px;margin-bottom:12px">
+      <h2 style="font-family:var(--serif);color:var(--text);margin:0 0 6px">Noch keine Platten</h2>
+      <p>Scanne den Barcode auf der Rückseite einer Platte – Künstler, Jahr und Land kommen automatisch von Discogs.</p>
+      <button class="btn primary" id="goScan">${ICON.barcode} Erste Platte scannen</button></div>`;
+    $('#goScan').onclick = () => setTab('scan');
+    return;
+  }
+  v.innerHTML = `
+    <div class="toolbar">
+      <input class="input" id="q" type="search" placeholder="Suchen: Künstler, Titel, Label …" value="${esc(settings.q)}">
+      <select class="input" id="sort" aria-label="Sortierung">
+        <option value="added">Neueste</option><option value="artist">Künstler</option><option value="year">Jahr</option>
+        <option value="value">Wert</option><option value="cond">Zustand</option>
+      </select>
+      <button class="iconbtn" id="viewT" aria-label="Ansicht wechseln">${settings.view === 'grid' ? ICON.list : ICON.grid}</button>
+    </div>
+    <div class="count" id="cnt"></div>
+    <div id="recs"></div>`;
+  $('#sort').value = settings.sort;
+  $('#q').oninput = e => { settings.q = e.target.value; saveSettings(); drawRecs(); };
+  $('#sort').onchange = e => { settings.sort = e.target.value; saveSettings(); drawRecs(); };
+  $('#viewT').onclick = () => { settings.view = settings.view === 'grid' ? 'list' : 'grid'; saveSettings(); renderCollection(v); };
+  drawRecs();
+}
+function drawRecs() {
+  const list = sortedFiltered();
+  $('#cnt').textContent = settings.q ? `${list.length} von ${records.length} Platten` : '';
+  const box = $('#recs');
+  box.className = settings.view === 'grid' ? 'grid' : 'list';
+  box.innerHTML = list.map(r => {
+    const val = estimate(r);
+    const meta = [r.year, r.country].filter(Boolean).join(' · ');
+    return settings.view === 'grid'
+      ? `<button class="rec" data-id="${r.id}"><div class="cov"><img loading="lazy" src="${esc(r.thumb || r.cover || VINYL_SVG)}" onerror="this.src='${VINYL_SVG}'" alt="">${r.mediaCond ? `<span class="pill">${esc(r.mediaCond)}</span>` : ''}</div>
+          <div class="t">${esc(r.title)}</div><div class="a">${esc(r.artist)}</div>
+          <div class="m"><span>${esc(meta)}</span>${val != null ? `<b>${money(val)}</b>` : ''}</div></button>`
+      : `<button class="rec" data-id="${r.id}"><div class="cov"><img loading="lazy" src="${esc(r.thumb || r.cover || VINYL_SVG)}" onerror="this.src='${VINYL_SVG}'" alt=""></div>
+          <div style="min-width:0"><div class="t">${esc(r.title)}</div><div class="a">${esc(r.artist)}${meta ? ' · ' + esc(meta) : ''}</div></div>
+          <div class="right">${r.mediaCond ? `<span class="pill">${esc(r.mediaCond)}</span>` : ''}<div style="margin-top:4px;font-weight:600">${val != null ? money(val) : ''}</div></div></button>`;
+  }).join('') || '<div class="empty">Keine Treffer</div>';
+  box.querySelectorAll('.rec').forEach(b => b.onclick = () => openDetail(b.dataset.id));
+}
+
+// ---------- Hinzufügen / Scannen ----------
+function renderScan(v) {
+  setHeader('Platte hinzufügen', 'Barcode scannen oder suchen');
+  v.innerHTML = `
+    ${!settings.token ? `<div class="banner"><b>Einmalig nötig:</b> ein kostenloser Discogs-Token, damit die App Platten erkennen und Preise abrufen kann.
+       <div style="margin-top:8px"><button class="btn small primary" id="toSettings">Token einrichten</button></div></div>` : ''}
+    <button class="btn primary block" id="scanBtn" style="padding:16px;font-size:17px">${ICON.barcode} Barcode scannen</button>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost" id="photoBtn">${ICON.camera} Foto vom Barcode</button>
+    </div>
+    <div class="or">oder eintippen</div>
+    <form id="codeForm" class="row" autocomplete="off">
+      <input class="input" id="code" inputmode="numeric" placeholder="Barcode-Nummer (EAN/UPC)">
+      <button class="btn" style="flex:0 0 auto">Suchen</button>
+    </form>
+    <form id="textForm" class="row" style="margin-top:10px" autocomplete="off">
+      <input class="input" id="txt" placeholder="Künstler, Titel oder Katalognummer">
+      <button class="btn" style="flex:0 0 auto">Suchen</button>
+    </form>
+    <div id="results" style="margin-top:16px"></div>
+    <div style="text-align:center;margin-top:18px"><button class="btn ghost small" id="manual">Ohne Discogs manuell anlegen</button></div>`;
+  if ($('#toSettings')) $('#toSettings').onclick = () => setTab('settings');
+  $('#scanBtn').onclick = openScanner;
+  $('#photoBtn').onclick = () => $('#photoInput').click();
+  $('#codeForm').onsubmit = e => { e.preventDefault(); const c = $('#code').value.trim(); if (c) runBarcodeSearch(c); };
+  $('#textForm').onsubmit = e => { e.preventDefault(); const q = $('#txt').value.trim(); if (q) runTextSearch(q); };
+  $('#manual').onclick = () => openForm(null, { mediaCond: 'VG+', sleeveCond: 'VG+' });
+  if (lastResults.length) drawResults(lastResults, lastResults._label);
+}
+
+async function runBarcodeSearch(code) {
+  const box = $('#results'); if (!box) return;
+  box.innerHTML = '<div class="spin"></div>';
+  try {
+    const res = await searchBarcode(code);
+    res._label = `Barcode ${code}`; res._code = code;
+    lastResults = res; drawResults(res, res._label);
+  } catch (e) { box.innerHTML = `<div class="banner">${esc(e.message)}</div>`; }
+}
+async function runTextSearch(q) {
+  const box = $('#results'); box.innerHTML = '<div class="spin"></div>';
+  try { const res = await searchText(q); res._label = `„${q}“`; lastResults = res; drawResults(res, res._label); }
+  catch (e) { box.innerHTML = `<div class="banner">${esc(e.message)}</div>`; }
+}
+function drawResults(res, label) {
+  const box = $('#results'); if (!box) return;
+  if (!res.length) {
+    box.innerHTML = `<div class="card"><b>Nichts gefunden für ${esc(label)}.</b><div class="hint" style="margin-top:6px">Versuch es mit Künstler und Titel oder lege die Platte manuell an.</div></div>`;
+    return;
+  }
+  // Vinyl zuerst
+  const isVinyl = r => (r.format || []).includes('Vinyl');
+  const sorted = [...res].sort((a, b) => isVinyl(b) - isVinyl(a));
+  box.innerHTML = `<div class="muted small" style="margin-bottom:8px">${sorted.length} Pressung${sorted.length > 1 ? 'en' : ''} für ${esc(label)} – wähle deine:</div>` +
+    sorted.map((r, i) => {
+      const owned = records.some(x => x.discogsId === r.id);
+      return `<button class="res" data-i="${i}">
+        <img loading="lazy" src="${esc(r.thumb || VINYL_SVG)}" onerror="this.src='${VINYL_SVG}'" alt="">
+        <div><div class="t">${esc(r.title)}</div>
+        <div class="d">${esc([(r.label || [])[0], r.catno].filter(Boolean).join(' · '))}</div>
+        <div class="tags">${r.year ? `<span class="pill acc">${esc(r.year)}</span>` : ''}${r.country ? `<span class="pill">${esc(r.country)}</span>` : ''}
+          <span class="pill">${esc((r.format || []).slice(0, 3).join(', '))}</span>${owned ? '<span class="pill acc">schon in Sammlung</span>' : ''}</div></div></button>`;
+    }).join('');
+  box.querySelectorAll('.res').forEach(b => b.onclick = () => pickResult(sorted[+b.dataset.i], res._code));
+}
+async function pickResult(r, code) {
+  const box = $('#results');
+  box.insertAdjacentHTML('afterbegin', '<div class="spin" id="pk"></div>');
+  try {
+    const full = await dg(`/releases/${r.id}`, { curr_abbr: settings.currency });
+    const d = fromRelease(full);
+    if (code) d.barcode = code;
+    else if (d.barcodes && d.barcodes[0]) d.barcode = d.barcodes[0];
+    delete d.barcodes;
+    $('#pk') && $('#pk').remove();
+    const owned = records.filter(x => x.discogsId === d.discogsId).length;
+    if (owned && !(await confirmBox(`Diese Pressung hast du schon ${owned}× in der Sammlung. Trotzdem ein weiteres Exemplar anlegen?`, 'Weiteres Exemplar'))) return;
+    openForm(null, { ...d, mediaCond: 'VG+', sleeveCond: 'VG+' });
+  } catch (e) { $('#pk') && $('#pk').remove(); toast(e.message); }
+}
+
+// Foto-Fallback
+$('#photoInput').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  try {
+    const reader = makeReader();
+    const result = await reader.decodeFromImageUrl(url);
+    toast('Barcode erkannt: ' + result.getText());
+    if (tab !== 'scan') setTab('scan');
+    $('#code').value = result.getText();
+    runBarcodeSearch(result.getText());
+  } catch (err) {
+    toast('Kein Barcode im Foto erkannt – bitte näher und gerade fotografieren');
+  } finally { URL.revokeObjectURL(url); }
+});
+
+function makeReader() {
+  const hints = new Map();
+  const F = ZXing.BarcodeFormat;
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128]);
+  hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+  return new ZXing.BrowserMultiFormatReader(hints, 300);
+}
+
+let scanReader = null;
+async function openScanner() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast('Live-Kamera nicht verfügbar – nutze „Foto vom Barcode“'); return;
+  }
+  const ov = document.createElement('div'); ov.className = 'scanner';
+  ov.innerHTML = `<video playsinline muted autoplay></video><div class="frame"></div>
+    <div class="msg">Barcode in den Rahmen halten</div><button class="close">Schließen</button>`;
+  document.body.appendChild(ov);
+  const video = ov.querySelector('video');
+  video.setAttribute('playsinline', ''); video.muted = true;
+  let done = false;
+  const close = () => { done = true; try { scanReader && scanReader.reset(); } catch (_) {} scanReader = null; ov.remove(); };
+  ov.querySelector('.close').onclick = close;
+  scanReader = makeReader();
+  try {
+    await scanReader.decodeFromConstraints(
+      { audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+      video,
+      (result) => {
+        if (!result || done) return;
+        const code = result.getText();
+        if (!/^\d{8,14}$/.test(code)) return;
+        try { navigator.vibrate && navigator.vibrate(60); } catch (_) {}
+        close();
+        if (tab !== 'scan') setTab('scan');
+        $('#code').value = code;
+        runBarcodeSearch(code);
+      });
+  } catch (e) {
+    close();
+    toast(e && e.name === 'NotAllowedError' ? 'Kamerazugriff verweigert – in den Browser-Einstellungen erlauben' : 'Kamera konnte nicht gestartet werden – nutze „Foto vom Barcode“');
+  }
+}
+
+// ---------- Sheets (Vollbild-Ansichten) ----------
+const sheetStack = [];
+function pushSheet(title, build, opts = {}) {
+  const s = document.createElement('div'); s.className = 'sheet';
+  s.innerHTML = `<div class="hd"><button class="back">‹ Zurück</button><div class="ttl">${esc(title)}</div><button class="act">${esc(opts.action || '')}</button></div><div class="bd"></div>`;
+  document.body.appendChild(s);
+  sheetStack.push(s);
+  s.querySelector('.back').onclick = () => popSheet();
+  if (opts.action) s.querySelector('.act').onclick = () => opts.onAction(s); else s.querySelector('.act').style.visibility = 'hidden';
+  build(s.querySelector('.bd'), s);
+  return s;
+}
+function popSheet() { const s = sheetStack.pop(); if (s) s.remove(); }
+function closeAllSheets() { while (sheetStack.length) popSheet(); }
+
+// ---------- Formular (neu / bearbeiten) ----------
+function gradePicker(name, value, list) {
+  return `<div class="grades" data-name="${name}">${list.map(g => `<button type="button" data-g="${esc(g[0])}" class="${g[0] === value ? 'on' : ''}">${esc(g[0])}</button>`).join('')}</div>
+    <div class="grade-desc" id="desc_${name}"></div>`;
+}
+function bindGrades(root, state, lists) {
+  root.querySelectorAll('.grades').forEach(gr => {
+    const name = gr.dataset.name, list = lists[name];
+    const upd = () => { const g = list.find(x => x[0] === state[name]); root.querySelector('#desc_' + name).textContent = g ? `${g[1]} – ${g[2]}` : ''; };
+    gr.querySelectorAll('button').forEach(b => b.onclick = () => {
+      state[name] = state[name] === b.dataset.g ? '' : b.dataset.g;
+      gr.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.g === state[name])); upd();
+    });
+    upd();
+  });
+}
+function starPicker(value) {
+  return `<div class="stars" id="stars">${[1,2,3,4,5].map(i => `<button type="button" data-s="${i}" class="${i <= (value||0) ? 'on' : ''}" aria-label="${i} Sterne">${ICON.star}</button>`).join('')}</div>`;
+}
+function bindStars(root, state) {
+  root.querySelectorAll('#stars button').forEach(b => b.onclick = () => {
+    const s = +b.dataset.s; state.stars = state.stars === s ? 0 : s;
+    root.querySelectorAll('#stars button').forEach(x => x.classList.toggle('on', +x.dataset.s <= state.stars));
+  });
+}
+
+function openForm(existing, preset) {
+  const isNew = !existing;
+  const st = isNew ? { ...preset } : { ...existing };
+  if (isNew) { st.purchaseDate = st.purchaseDate || today(); }
+  const fromDiscogs = !!st.discogsId;
+  pushSheet(isNew ? 'Neue Platte' : 'Bearbeiten', (bd, sheet) => {
+    bd.innerHTML = `
+      ${fromDiscogs ? `<div class="hero"><img src="${esc(st.thumb || st.cover || VINYL_SVG)}" onerror="this.src='${VINYL_SVG}'" alt="">
+        <div><h2>${esc(st.title)}</h2><div class="a">${esc(st.artist)}</div>
+        <div class="y">${st.year ? `<span class="pill acc">${esc(st.year)}</span>` : ''}${st.country ? `<span class="pill">${esc(st.country)}</span>` : ''}</div>
+        <div class="small faint" style="margin-top:6px">${esc([st.label, st.catno].filter(Boolean).join(' · '))}</div></div></div>` : ''}
+      <form id="f" autocomplete="off">
+      ${fromDiscogs ? '' : `
+        <label class="field"><span>Künstler *</span><input class="input" name="artist" required value="${esc(st.artist)}"></label>
+        <label class="field"><span>Titel *</span><input class="input" name="title" required value="${esc(st.title)}"></label>
+        <div class="grid2"><label class="field"><span>Jahr</span><input class="input" name="year" inputmode="numeric" value="${esc(st.year || '')}"></label>
+        <label class="field"><span>Land</span><input class="input" name="country" value="${esc(st.country)}"></label></div>
+        <div class="grid2"><label class="field"><span>Label</span><input class="input" name="label" value="${esc(st.label)}"></label>
+        <label class="field"><span>Katalog-Nr.</span><input class="input" name="catno" value="${esc(st.catno)}"></label></div>
+        <label class="field"><span>Format</span><input class="input" name="format" placeholder="z. B. Vinyl, LP, Album" value="${esc(st.format)}"></label>
+        <label class="field"><span>Barcode</span><input class="input" name="barcode" inputmode="numeric" value="${esc(st.barcode)}"></label>`}
+      <div class="card"><h3>Zustand Platte (Media)</h3>${gradePicker('mediaCond', st.mediaCond, GRADES)}</div>
+      <div class="card"><h3>Zustand Hülle (Sleeve)</h3>${gradePicker('sleeveCond', st.sleeveCond, [...GRADES, ...SLEEVE_EXTRA])}</div>
+      <div class="card"><h3>Meine Bewertung</h3>${starPicker(st.stars)}</div>
+      <div class="grid2">
+        <label class="field"><span>Kaufpreis (${settings.currency})</span><input class="input" name="purchasePrice" inputmode="decimal" placeholder="0,00" value="${st.purchasePrice != null ? String(st.purchasePrice).replace('.', ',') : ''}"></label>
+        <label class="field"><span>Gekauft am</span><input class="input" type="date" name="purchaseDate" value="${esc(st.purchaseDate || '')}"></label>
+      </div>
+      <label class="field"><span>Gekauft bei</span><input class="input" name="source" placeholder="z. B. Flohmarkt, Plattenladen, geerbt" value="${esc(st.source)}"></label>
+      <label class="field"><span>Notizen</span><textarea class="input" name="notes" placeholder="z. B. Erstpressung, signiert, kleiner Kratzer Seite B">${esc(st.notes)}</textarea></label>
+      <button class="btn primary block" style="margin-top:6px">${isNew ? 'In Sammlung speichern' : 'Änderungen speichern'}</button>
+      </form>`;
+    bindGrades(bd, st, { mediaCond: GRADES, sleeveCond: [...GRADES, ...SLEEVE_EXTRA] });
+    bindStars(bd, st);
+    bd.querySelector('#f').onsubmit = async e => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      for (const [k, v] of fd.entries()) st[k] = typeof v === 'string' ? v.trim() : v;
+      if (!fromDiscogs) st.year = parseInt(st.year) || null;
+      st.purchasePrice = parseNum(st.purchasePrice);
+      if (isNew) {
+        st.id = uid(); st.addedAt = Date.now();
+        records.push(st);
+      } else {
+        const i = records.findIndex(r => r.id === st.id); records[i] = st;
+      }
+      await saveRecords();
+      popSheet();
+      if (isNew) {
+        toast('Gespeichert ✓');
+        lastResults = [];
+        if (st.discogsId && settings.token) {
+          updateMarket(st).then(saveRecords).then(() => { takeSnapshot(); if (tab === 'sammlung') render(); }).catch(() => {});
+        }
+        setTab('sammlung');
+      } else {
+        // Wert neu berechnen (anderer Zustand → anderer Preisvorschlag)
+        const v = estimate(st);
+        if (v != null && st.valueHistory) { const l = st.valueHistory[st.valueHistory.length - 1]; if (l && l.d === today()) l.v = v; }
+        await saveRecords();
+        if (sheetStack.length) { popSheet(); openDetail(st.id); }
+        render();
+      }
+    };
+  });
+}
+
+// ---------- Detailansicht ----------
+function openDetail(id) {
+  const r = records.find(x => x.id === id); if (!r) return;
+  pushSheet(r.artist, (bd) => drawDetail(bd, r), { action: 'Bearbeiten', onAction: () => openForm(r) });
+}
+function drawDetail(bd, r) {
+  const val = estimate(r), m = r.market || {};
+  const gain = val != null && r.purchasePrice != null ? val - r.purchasePrice : null;
+  const g = GRADES.find(x => x[0] === r.mediaCond);
+  const sg = [...GRADES, ...SLEEVE_EXTRA].find(x => x[0] === r.sleeveCond);
+  bd.innerHTML = `
+    <img class="cover-big" src="${esc(r.cover || r.thumb || VINYL_SVG)}" onerror="this.src='${VINYL_SVG}'" alt="">
+    <h2 style="font-family:var(--serif);font-size:26px;margin:0;line-height:1.15">${esc(r.title)}</h2>
+    <div class="muted" style="font-size:17px;margin-top:4px">${esc(r.artist)}</div>
+    <div class="y" style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px">
+      ${r.year ? `<span class="pill acc">${esc(r.year)}</span>` : ''}${r.country ? `<span class="pill">${esc(r.country)}</span>` : ''}
+      ${(r.genres || []).map(x => `<span class="pill">${esc(x)}</span>`).join('')}
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><div class="l">Platte</div><div class="v">${esc(r.mediaCond || '–')}</div><div class="s">${g ? esc(g[1]) : 'nicht bewertet'}</div></div>
+      <div class="kpi"><div class="l">Hülle</div><div class="v">${esc(r.sleeveCond || '–')}</div><div class="s">${sg ? esc(sg[1]) : 'nicht bewertet'}</div></div>
+    </div>
+    ${r.stars ? `<div class="card row" style="justify-content:space-between"><span class="muted">Meine Bewertung</span><span style="color:var(--accent);letter-spacing:2px;flex:0 0 auto">${'★'.repeat(r.stars)}<span class="faint">${'★'.repeat(5 - r.stars)}</span></span></div>` : ''}
+
+    <div class="card">
+      <h3>Marktwert</h3>
+      ${r.discogsId ? `
+        <div class="kpis" style="margin-bottom:8px">
+          <div class="kpi"><div class="l">Schätzwert</div><div class="v">${money(val)}</div><div class="s">${esc(estimateSource(r) || 'noch nicht abgerufen')}</div></div>
+          <div class="kpi"><div class="l">Kaufpreis</div><div class="v">${money(r.purchasePrice)}</div><div class="s">${gain != null ? `<span class="${gain >= 0 ? 'up' : 'down'}">${gain >= 0 ? '+' : ''}${money(gain)}</span>` : '&nbsp;'}</div></div>
+        </div>
+        <dl class="meta">
+          <dt>Günstigstes Angebot</dt><dd>${m.lowest != null ? money(m.lowest, m.currency) : '–'}</dd>
+          <dt>Angebote auf Discogs</dt><dd>${m.numForSale != null ? num(m.numForSale) : '–'}</dd>
+          <dt>Haben / Suchen</dt><dd>${r.community && r.community.have != null ? `${num(r.community.have)} / ${num(r.community.want)}` : '–'}</dd>
+          <dt>Stand</dt><dd>${m.updated ? new Date(m.updated).toLocaleString('de-DE', {dateStyle:'short', timeStyle:'short'}) : '–'}</dd>
+        </dl>
+        ${m.suggest ? `<details style="margin-top:12px"><summary>Preisvorschläge nach Zustand</summary>
+          <table class="ptable" style="margin-top:6px">${GRADES.filter(x => m.suggest[x[0]]).map(x => `<tr class="${x[0] === r.mediaCond ? 'me' : ''}"><td>${x[0]} · ${x[1]}</td><td>${money(m.suggest[x[0]].value, m.suggest[x[0]].currency)}</td></tr>`).join('')}</table></details>` : ''}
+        ${(r.valueHistory || []).length >= 2 ? `<div style="margin-top:14px"><div class="small muted" style="margin-bottom:4px">Wertverlauf</div><div class="chart" id="vh"></div></div>` : ''}
+        <div class="links">
+          <button class="btn small" id="upd">Preis aktualisieren</button>
+          <a class="btn small ghost" href="https://www.discogs.com/sell/release/${r.discogsId}?currency=${settings.currency}" target="_blank" rel="noopener">Angebote ansehen</a>
+          <a class="btn small ghost" href="${esc(r.uri || 'https://www.discogs.com/release/' + r.discogsId)}" target="_blank" rel="noopener">Auf Discogs</a>
+        </div>`
+      : `<div class="hint">Diese Platte ist nicht mit Discogs verknüpft – Marktpreise gibt es nur für Platten, die per Barcode oder Suche angelegt wurden.</div>
+         <div class="kpis" style="margin:10px 0 0"><div class="kpi"><div class="l">Kaufpreis</div><div class="v">${money(r.purchasePrice)}</div></div></div>`}
+    </div>
+
+    <div class="card"><h3>Details</h3><dl class="meta">
+      ${r.label ? `<dt>Label</dt><dd>${esc(r.label)}</dd>` : ''}${r.catno ? `<dt>Katalog-Nr.</dt><dd>${esc(r.catno)}</dd>` : ''}
+      ${r.format ? `<dt>Format</dt><dd>${esc(r.format)}</dd>` : ''}${(r.styles || []).length ? `<dt>Stil</dt><dd>${esc(r.styles.join(', '))}</dd>` : ''}
+      ${r.barcode ? `<dt>Barcode</dt><dd>${esc(r.barcode)}</dd>` : ''}
+      <dt>Gekauft am</dt><dd>${dateDE(r.purchaseDate)}</dd>
+      ${r.source ? `<dt>Gekauft bei</dt><dd>${esc(r.source)}</dd>` : ''}
+      <dt>Hinzugefügt</dt><dd>${dateDE(r.addedAt)}</dd>
+      ${r.notes ? `<dt>Notizen</dt><dd>${esc(r.notes).replace(/\n/g, '<br>')}</dd>` : ''}
+    </dl></div>
+
+    ${(r.tracklist || []).length ? `<div class="card"><details><summary>Titelliste (${r.tracklist.length})</summary><div style="margin-top:8px">
+      ${r.tracklist.map(t => `<div class="track"><span class="p">${esc(t.p)}</span><span>${esc(t.t)}</span><span class="d">${esc(t.d)}</span></div>`).join('')}</div></details></div>` : ''}
+
+    <button class="btn danger block" id="del" style="margin-top:8px">Aus Sammlung entfernen</button>`;
+  if ((r.valueHistory || []).length >= 2) requestAnimationFrame(() => lineChart($('#vh', bd), r.valueHistory.map(p => ({ x: +new Date(p.d), y: p.v })), { h: 130, fmt: v => money(v) }));
+  const upd = $('#upd', bd);
+  if (upd) upd.onclick = async () => {
+    if (!settings.token) { toast('Bitte zuerst Discogs-Token einrichten'); return; }
+    upd.disabled = true; upd.textContent = 'Lädt …';
+    try { await updateMarket(r, { details: true }); await saveRecords(); takeSnapshot(); drawDetail(bd, r); render(); toast('Preis aktualisiert'); }
+    catch (e) { toast(e.message); upd.disabled = false; upd.textContent = 'Preis aktualisieren'; }
+  };
+  $('#del', bd).onclick = async () => {
+    if (!(await confirmBox(`„${r.title}“ wirklich aus der Sammlung entfernen?`, 'Entfernen', true))) return;
+    records = records.filter(x => x.id !== r.id); await saveRecords(); takeSnapshot();
+    popSheet(); render(); toast('Entfernt');
+  };
+}
+
+// ---------- Diagramme ----------
+function niceMax(v) { if (v <= 0) return 1; const p = 10 ** Math.floor(Math.log10(v)); const n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p; }
+function lineChart(el, pts, opt = {}) {
+  if (!el || !pts.length) return;
+  const W = el.clientWidth || 320, H = opt.h || 170, P = { l: 44, r: 12, t: 14, b: 24 };
+  let x0 = Math.min(...pts.map(p => p.x)), x1 = Math.max(...pts.map(p => p.x));
+  if (x0 === x1) { x0 -= 864e5 * 15; x1 += 864e5 * 15; }
+  const yMax = niceMax(Math.max(...pts.map(p => p.y)) * 1.05);
+  const sx = x => P.l + (x - x0) / (x1 - x0) * (W - P.l - P.r);
+  const sy = y => P.t + (1 - y / yMax) * (H - P.t - P.b);
+  const fmt = opt.fmt || (v => num(v));
+  let d = '';
+  pts.forEach((p, i) => {
+    if (i === 0) d += `M${sx(p.x)},${sy(p.y)}`;
+    else d += opt.step ? `H${sx(p.x)}V${sy(p.y)}` : `L${sx(p.x)},${sy(p.y)}`;
+  });
+  const area = d + `V${sy(0)}H${sx(pts[0].x)}Z`;
+  const ticks = [0, yMax / 2, yMax];
+  const xl = t => new Date(t).toLocaleDateString('de-DE', opt.monthly ? { month: 'short', year: '2-digit' } : { day: '2-digit', month: '2-digit', year: '2-digit' });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="${esc(opt.label || 'Diagramm')}">
+    ${ticks.map(t => `<line x1="${P.l}" x2="${W - P.r}" y1="${sy(t)}" y2="${sy(t)}" stroke="var(--line)" stroke-width="1" ${t ? 'stroke-dasharray="2 4"' : ''}/>
+      <text x="${P.l - 6}" y="${sy(t) + 4}" text-anchor="end" font-size="11" fill="var(--faint)">${esc(opt.axisFmt ? opt.axisFmt(t) : fmt(t))}</text>`).join('')}
+    <path d="${area}" fill="var(--accent)" opacity=".12"/>
+    <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <text x="${P.l}" y="${H - 6}" font-size="11" fill="var(--faint)">${xl(pts[0].x)}</text>
+    <text x="${W - P.r}" y="${H - 6}" font-size="11" text-anchor="end" fill="var(--faint)">${xl(pts[pts.length - 1].x)}</text>
+    <line class="cx" y1="${P.t}" y2="${H - P.b}" stroke="var(--muted)" stroke-width="1" opacity="0"/>
+    <circle class="dt" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" opacity="0"/>
+    <rect x="${P.l}" y="0" width="${W - P.l - P.r}" height="${H}" fill="transparent" class="hit"/>
+  </svg><div class="tip hidden"></div>`;
+  const svg = el.querySelector('svg'), tip = el.querySelector('.tip'), cx = el.querySelector('.cx'), dt = el.querySelector('.dt');
+  const show = ev => {
+    const rect = svg.getBoundingClientRect();
+    const mx = (ev.clientX - rect.left) * (W / rect.width);
+    let best = pts[0]; for (const p of pts) if (Math.abs(sx(p.x) - mx) < Math.abs(sx(best.x) - mx)) best = p;
+    const X = sx(best.x), Y = sy(best.y);
+    cx.setAttribute('x1', X); cx.setAttribute('x2', X); cx.setAttribute('opacity', '.5');
+    dt.setAttribute('cx', X); dt.setAttribute('cy', Y); dt.setAttribute('opacity', '1');
+    tip.classList.remove('hidden');
+    tip.innerHTML = `<b>${esc(fmt(best.y))}</b>${esc(best.label || xl(best.x))}`;
+    const px = X * rect.width / W; tip.style.left = Math.min(Math.max(px, 60), rect.width - 60) + 'px'; tip.style.top = (Y * rect.height / H - 10) + 'px';
+  };
+  const hide = () => { tip.classList.add('hidden'); cx.setAttribute('opacity', '0'); dt.setAttribute('opacity', '0'); };
+  const hit = el.querySelector('.hit');
+  hit.addEventListener('pointermove', show); hit.addEventListener('pointerdown', show); hit.addEventListener('pointerleave', hide);
+}
+function hbars(items, fmt = num) {
+  const max = Math.max(...items.map(i => i.value), 1);
+  return items.map(i => `<div class="hbar"><span class="lab">${esc(i.label)}</span><div class="track2"><div class="fill" style="width:${(i.value / max * 100).toFixed(1)}%"></div></div><span class="val">${esc(fmt(i.value))}</span></div>`).join('');
+}
+function countBy(list, fn) {
+  const m = new Map();
+  list.forEach(r => [].concat(fn(r)).forEach(k => { if (k) m.set(k, (m.get(k) || 0) + 1); }));
+  return [...m.entries()].map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value);
+}
+
+// ---------- Statistik ----------
+function acquired(r) { return r.purchaseDate ? +new Date(r.purchaseDate) : (r.addedAt || Date.now()); }
+function renderStats(v) {
+  setHeader('Statistik', records.length ? `${num(records.length)} Platten` : '');
+  if (!records.length) { v.innerHTML = '<div class="empty">Sobald du Platten hinzufügst, siehst du hier, wie deine Sammlung wächst.</div>'; return; }
+  const total = records.reduce((s, r) => s + (estimate(r) || 0), 0);
+  const priced = records.filter(r => estimate(r) != null).length;
+  const paid = records.reduce((s, r) => s + (r.purchasePrice || 0), 0);
+  const paidCount = records.filter(r => r.purchasePrice != null).length;
+  const gainBase = records.filter(r => r.purchasePrice != null && estimate(r) != null);
+  const gain = gainBase.reduce((s, r) => s + estimate(r) - r.purchasePrice, 0);
+  const thisYear = new Date().getFullYear();
+  const addedThisYear = records.filter(r => new Date(acquired(r)).getFullYear() === thisYear).length;
+
+  // Wachstum
+  const sorted = [...records].sort((a, b) => acquired(a) - acquired(b));
+  const first = acquired(sorted[0]), span = Date.now() - first;
+  const monthly = span > 62 * 864e5;
+  const growth = [];
+  if (monthly) {
+    const d = new Date(first); d.setDate(1); d.setHours(0,0,0,0);
+    const end = new Date();
+    while (d <= end) {
+      const next = new Date(d); next.setMonth(next.getMonth() + 1);
+      const c = sorted.filter(r => acquired(r) < +next).length;
+      growth.push({ x: +d, y: c, label: d.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }) });
+      d.setMonth(d.getMonth() + 1);
+    }
+  } else {
+    const d = new Date(first); d.setHours(0,0,0,0);
+    const end = new Date();
+    while (d <= end) {
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      growth.push({ x: +d, y: sorted.filter(r => acquired(r) < +next).length, label: d.toLocaleDateString('de-DE') });
+      d.setDate(d.getDate() + 1);
+    }
+  }
+
+  // Jahrzehnte
+  const decades = countBy(records.filter(r => r.year), r => Math.floor(r.year / 10) * 10).sort((a, b) => a.label - b.label);
+  const decMax = Math.max(...decades.map(d => d.value), 1);
+  const countries = countBy(records, r => r.country);
+  const genres = countBy(records, r => r.genres || []);
+  const conds = GRADES.map(g => ({ label: `${g[0]} · ${g[1]}`, value: records.filter(r => r.mediaCond === g[0]).length })).filter(x => x.value);
+  const top = records.filter(r => estimate(r) != null).sort((a, b) => estimate(b) - estimate(a)).slice(0, 5);
+  const artists = countBy(records, r => r.artist).filter(a => a.value > 1);
+
+  v.innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="l">Platten</div><div class="v">${num(records.length)}</div><div class="s">${addedThisYear} in ${thisYear}</div></div>
+      <div class="kpi"><div class="l">Marktwert</div><div class="v">${money(total)}</div><div class="s">${priced} von ${records.length} bewertet</div></div>
+      <div class="kpi"><div class="l">Bezahlt</div><div class="v">${money(paid)}</div><div class="s">${paidCount} mit Kaufpreis</div></div>
+      <div class="kpi"><div class="l">Wertentwicklung</div><div class="v ${gainBase.length ? (gain >= 0 ? 'up' : 'down') : ''}">${gainBase.length ? (gain >= 0 ? '+' : '') + money(gain) : '–'}</div><div class="s">${gainBase.length ? `über ${gainBase.length} Platten` : 'Kaufpreis + Marktwert nötig'}</div></div>
+    </div>
+
+    <div class="card"><h3>So wächst deine Sammlung</h3><div class="chart" id="gc"></div>
+      <div class="hint" style="margin-top:6px">Nach Kaufdatum · antippen für Details</div></div>
+
+    <div class="card"><h3>Wert der Sammlung</h3>
+      ${snapshots.filter(s => s.value > 0).length >= 2 ? '<div class="chart" id="wc"></div><div class="hint" style="margin-top:6px">Ein Punkt pro Preis-Aktualisierung</div>'
+        : '<div class="hint">Der Verlauf entsteht, wenn du die Marktpreise ab und zu aktualisierst (Einstellungen → „Alle Marktpreise aktualisieren“).</div>'}
+    </div>
+
+    ${top.length ? `<div class="card"><h3>Wertvollste Platten</h3>${top.map(r => `<button class="top5" data-id="${r.id}"><img src="${esc(r.thumb || VINYL_SVG)}" onerror="this.src='${VINYL_SVG}'" alt="">
+      <div style="min-width:0"><div class="t">${esc(r.title)}</div><div class="a">${esc(r.artist)} · ${esc(r.mediaCond || '–')}</div></div><div class="v">${money(estimate(r))}</div></button>`).join('')}</div>` : ''}
+
+    ${decades.length ? `<div class="card"><h3>Nach Jahrzehnt</h3><div class="vbars">${decades.map(d => `<div class="col"><span class="n">${d.value}</span><div class="bar" style="height:${(d.value / decMax * 100).toFixed(1)}%"></div><span class="x">${d.label}er</span></div>`).join('')}</div></div>` : ''}
+
+    ${conds.length ? `<div class="card"><h3>Zustand der Platten</h3>${hbars(conds)}</div>` : ''}
+    ${countries.length ? `<div class="card"><h3>Herkunftsländer</h3>${hbars(countries.slice(0, 8))}</div>` : ''}
+    ${genres.length ? `<div class="card"><h3>Genres</h3>${hbars(genres.slice(0, 8))}</div>` : ''}
+    ${artists.length ? `<div class="card"><h3>Meistgesammelte Künstler</h3>${hbars(artists.slice(0, 6))}</div>` : ''}`;
+
+  requestAnimationFrame(() => {
+    lineChart($('#gc'), growth, { step: true, monthly, h: 170, label: 'Anzahl Platten über Zeit', fmt: v => `${num(v)} Platten`, axisFmt: v => num(v) });
+    const sn = snapshots.filter(s => s.value > 0);
+    if (sn.length >= 2) lineChart($('#wc'), sn.map(s => ({ x: +new Date(s.d), y: s.value, label: `${new Date(s.d).toLocaleDateString('de-DE')} · ${s.count} Platten` })),
+      { h: 150, label: 'Wert der Sammlung', fmt: v => money(v), axisFmt: v => v >= 1000 ? (v / 1000).toLocaleString('de-DE') + ' Tsd.' : num(v) });
+  });
+  v.querySelectorAll('.top5').forEach(b => b.onclick = () => openDetail(b.dataset.id));
+}
+
+// ---------- Einstellungen ----------
+function renderSettings(v) {
+  setHeader('Einstellungen', '');
+  const withId = records.filter(r => r.discogsId).length;
+  v.innerHTML = `
+    <div class="card">
+      <h3>Discogs-Verbindung</h3>
+      <div class="hint" style="margin-bottom:10px">Discogs ist die größte Plattendatenbank mit Marktplatz. Die App braucht einen kostenlosen persönlichen Token:
+        <ol style="margin:8px 0 0;padding-left:18px">
+          <li>Bei <a href="https://www.discogs.com" target="_blank" rel="noopener">discogs.com</a> anmelden (kostenlos)</li>
+          <li><a href="https://www.discogs.com/settings/developers" target="_blank" rel="noopener">Einstellungen → Entwickler</a> öffnen</li>
+          <li>„Neuen Token generieren“, kopieren und hier einfügen</li>
+        </ol></div>
+      <label class="field"><span>Persönlicher Token</span><input class="input" id="tok" type="password" autocomplete="off" value="${esc(settings.token)}" placeholder="Token einfügen"></label>
+      <div class="row"><button class="btn primary" id="saveTok">Speichern & testen</button></div>
+      <div id="tokStatus" class="small" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Marktpreise</h3>
+      <label class="field"><span>Währung</span><select class="input" id="cur">${['EUR','USD','GBP','CHF'].map(c => `<option ${c === settings.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+      <div class="hint">${withId} Platten mit Discogs-Verknüpfung. Aktualisieren dauert ca. ${Math.max(1, Math.ceil(withId * 2.2 / 60))} Min. (Discogs erlaubt 60 Anfragen pro Minute).
+        ${settings.noSuggest ? '<br>Preisvorschläge nach Zustand sind aus – dafür musst du auf Discogs einmal die <a href="https://www.discogs.com/settings/seller" target="_blank" rel="noopener">Verkäufer-Einstellungen</a> ausfüllen (ohne etwas zu verkaufen). Danach Token neu speichern.' : ''}</div>
+      <button class="btn block" id="refresh" style="margin-top:10px" ${busyRefresh ? 'disabled' : ''}>Alle Marktpreise aktualisieren</button>
+      <div class="progress hidden" id="prog"><div></div></div>
+      <div class="small muted" id="progTxt" style="margin-top:6px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Discogs-Sammlung importieren</h3>
+      <div class="hint" style="margin-bottom:10px">Falls du deine Platten schon auf Discogs erfasst hast.</div>
+      <div class="row"><input class="input" id="user" placeholder="Discogs-Benutzername" value="${esc(settings.username)}"><button class="btn" id="imp" style="flex:0 0 auto">Importieren</button></div>
+      <div class="small muted" id="impTxt" style="margin-top:6px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Sicherung</h3>
+      <div class="hint" style="margin-bottom:10px">Deine Daten liegen nur auf diesem Gerät. Exportiere regelmäßig eine Sicherung (z. B. in iCloud Drive) – damit kannst du sie auch auf ein neues Handy übertragen.</div>
+      <div class="grid2"><button class="btn" id="exp">Sicherung exportieren</button><button class="btn" id="impF">Sicherung laden</button></div>
+      <button class="btn ghost block" id="csv" style="margin-top:10px">Als CSV exportieren (Excel)</button>
+    </div>
+
+    <div class="card"><h3>Bewertungsskala</h3><div class="hint" style="margin-bottom:6px">Goldmine-Standard, wie auf Discogs üblich:</div>
+      ${GRADES.map(g => `<div class="small" style="padding:4px 0;border-bottom:1px solid var(--line)"><b>${g[0]}</b> · ${g[1]} – <span class="muted">${g[2]}</span></div>`).join('')}
+    </div>
+
+    <button class="btn danger block" id="wipe">Alle Daten löschen</button>
+    <p class="small faint" style="text-align:center;margin-top:16px">Plattendaten und Preise: Discogs. Diese App ist nicht mit Discogs verbunden.</p>`;
+
+  $('#saveTok').onclick = async () => {
+    settings.token = $('#tok').value.trim(); settings.noSuggest = false; await saveSettings();
+    const s = $('#tokStatus');
+    if (!settings.token) { s.textContent = 'Token entfernt.'; return; }
+    s.textContent = 'Teste Verbindung …';
+    try {
+      const me = await dg('/oauth/identity');
+      s.innerHTML = `<span class="up">✓ Verbunden als ${esc(me.username)}</span>`;
+      if (!settings.username) { settings.username = me.username; saveSettings(); $('#user').value = me.username; }
+    } catch (e) { s.innerHTML = `<span class="down">${esc(e.message)}</span>`; }
+  };
+  $('#cur').onchange = e => { settings.currency = e.target.value; saveSettings(); toast('Währung geändert – Preise bitte aktualisieren'); };
+  $('#refresh').onclick = async () => {
+    if (!settings.token) { toast('Bitte zuerst Token einrichten'); return; }
+    $('#refresh').disabled = true; $('#prog').classList.remove('hidden');
+    await refreshAll((i, n) => {
+      const p = $('#prog > div'); if (p) p.style.width = (i / n * 100) + '%';
+      const t = $('#progTxt'); if (t) t.textContent = `${i} von ${n} …`;
+    });
+    if (tab === 'settings') renderSettings(v);
+  };
+  $('#imp').onclick = () => importDiscogs($('#user').value.trim());
+  $('#exp').onclick = exportJSON;
+  $('#impF').onclick = () => $('#importInput').click();
+  $('#csv').onclick = exportCSV;
+  $('#wipe').onclick = async () => {
+    if (!(await confirmBox('Wirklich ALLE Platten und Statistiken löschen? Das kann nicht rückgängig gemacht werden. Exportiere vorher eine Sicherung.', 'Alles löschen', true))) return;
+    records = []; snapshots = []; await saveRecords(); await saveSnapshots(); toast('Alles gelöscht'); render();
+  };
+}
+
+async function importDiscogs(user) {
+  const t = $('#impTxt');
+  if (!settings.token) { toast('Bitte zuerst Token einrichten'); return; }
+  if (!user) { toast('Benutzername eingeben'); return; }
+  settings.username = user; saveSettings();
+  let page = 1, pages = 1, added = 0;
+  try {
+    do {
+      t.textContent = `Lade Seite ${page} …`;
+      const j = await dg(`/users/${encodeURIComponent(user)}/collection/folders/0/releases`, { per_page: 100, page, sort: 'added', sort_order: 'asc' });
+      pages = j.pagination ? j.pagination.pages : 1;
+      for (const it of j.releases || []) {
+        const b = it.basic_information || {};
+        const instanceKey = 'dgi_' + it.instance_id;
+        if (records.some(r => r.dgInstance === instanceKey)) continue;
+        const lab = (b.labels || [])[0] || {};
+        records.push({
+          id: uid(), dgInstance: instanceKey, discogsId: b.id,
+          artist: cleanArtist((b.artists || []).map(a => a.anv || a.name).join(', ')), title: b.title || '',
+          year: b.year || null, country: '', label: cleanArtist(lab.name || ''), catno: lab.catno || '',
+          format: fmtFormats(b.formats), genres: b.genres || [], styles: b.styles || [],
+          cover: b.cover_image || '', thumb: b.thumb || '',
+          mediaCond: '', sleeveCond: '', stars: it.rating || 0,
+          purchaseDate: it.date_added ? it.date_added.slice(0, 10) : today(), addedAt: Date.now(),
+        });
+        added++;
+      }
+      page++;
+    } while (page <= pages);
+    await saveRecords();
+    t.innerHTML = `<span class="up">✓ ${added} Platten importiert.</span> Land, Titelliste und Preise kommen mit „Alle Marktpreise aktualisieren“.`;
+  } catch (e) { t.innerHTML = `<span class="down">${esc(e.message)}</span>`; await saveRecords(); }
+}
+
+// ---------- Export / Import ----------
+async function offerFile(name, text, mime) {
+  const blob = new Blob([text], { type: mime });
+  try {
+    const file = new File([blob], name, { type: mime });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+function exportJSON() {
+  const data = { app: 'plattenregal', version: 1, exported: new Date().toISOString(), records, snapshots,
+    settings: { currency: settings.currency, username: settings.username } };
+  offerFile(`plattenregal-${today()}.json`, JSON.stringify(data), 'application/json');
+}
+function exportCSV() {
+  const cols = [['Künstler','artist'],['Titel','title'],['Jahr','year'],['Land','country'],['Label','label'],['Katalog-Nr.','catno'],['Format','format'],
+    ['Genre',r=>(r.genres||[]).join(', ')],['Zustand Platte','mediaCond'],['Zustand Hülle','sleeveCond'],['Sterne','stars'],['Kaufpreis',r=>r.purchasePrice ?? ''],
+    ['Kaufdatum','purchaseDate'],['Gekauft bei','source'],['Schätzwert',r=>estimate(r) ?? ''],['Günstigstes Angebot',r=>r.market?.lowest ?? ''],['Barcode','barcode'],['Discogs-ID','discogsId'],['Notizen','notes']];
+  const cell = v => { v = v == null ? '' : String(v); if (typeof v === 'string' && /^\d+\.\d+$/.test(v)) v = v.replace('.', ','); return /[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; };
+  const lines = [cols.map(c => c[0]).join(';'), ...records.map(r => cols.map(([, k]) => cell(typeof k === 'function' ? k(r) : r[k])).join(';'))];
+  offerFile(`plattenregal-${today()}.csv`, '﻿' + lines.join('\n'), 'text/csv');
+}
+$('#importInput').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!Array.isArray(data.records)) throw new Error('Keine gültige Plattenregal-Sicherung');
+    const ok = await confirmBox(`Sicherung mit ${data.records.length} Platten laden? Platten mit gleicher ID werden überschrieben, alle anderen bleiben erhalten.`, 'Laden');
+    if (!ok) return;
+    const byId = new Map(records.map(r => [r.id, r]));
+    data.records.forEach(r => byId.set(r.id, r));
+    records = [...byId.values()];
+    if (Array.isArray(data.snapshots)) {
+      const m = new Map(snapshots.map(s => [s.d, s])); data.snapshots.forEach(s => m.set(s.d, s));
+      snapshots = [...m.values()].sort((a, b) => a.d.localeCompare(b.d));
+    }
+    await saveRecords(); await saveSnapshots(); toast(`${data.records.length} Platten geladen`); render();
+  } catch (err) { toast('Import fehlgeschlagen: ' + err.message); }
+});
+
+// ---------- Start ----------
+(async function init() {
+  await Store.open();
+  records = await Store.get('records', []);
+  snapshots = await Store.get('snapshots', []);
+  settings = { ...settings, ...(await Store.get('settings', {})) };
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (_) {}
+  render();
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (tab === 'stats') render(); }, 250); });
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+.DS_Store
+# Sicherungen mit persönlichen Daten nie hochladen
+plattenregal-*.json
+plattenregal-*.csv
+*.json.bak
+.claude/settings.local.json
